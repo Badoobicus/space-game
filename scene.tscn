@@ -1,0 +1,56 @@
+[gd_scene load_steps=3 format=3 uid="uid://ucfbal53xg53"]
+
+[sub_resource type="CSharpScript" id="CSharpScript_xjfm6"]
+script/source = "using Godot;
+using System;
+
+public partial class player : Node3D
+{
+	private const float SPEED = 2.5f;
+
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
+	{
+
+	}
+
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _PhysicsProcess(double delta)
+	{
+		Vector3 inputVector = Vector3.Zero;
+		if (Input.IsActionPressed(\"Move Forward\"))
+		{
+			inputVector += Vector3.Forward;
+		}
+		if (Input.IsActionPressed(\"Move Backward\"))
+		{
+			inputVector += Vector3.Back;
+		}
+		if (Input.IsActionPressed(\"Move Left\"))
+		{
+			inputVector += Vector3.Left;
+		}
+		if (Input.IsActionPressed(\"Move Right\"))
+		{
+			inputVector += Vector3.Right;
+		}
+		this.Position += inputVector.Normalized() * (float)delta * SPEED;
+	}
+}
+"
+
+[sub_resource type="SphereMesh" id="SphereMesh_n5gon"]
+
+[node name="Scene" type="Node3D"]
+
+[node name="Player" type="Node3D" parent="."]
+script = SubResource("CSharpScript_xjfm6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+mesh = SubResource("SphereMesh_n5gon")
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0)
+
+[node name="Light" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, 3, 3, 3)

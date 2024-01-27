@@ -1,0 +1,57 @@
+[gd_scene load_steps=4 format=3 uid="uid://cc7d323b5uql3"]
+
+[ext_resource type="Script" path="res://vab/Build.cs" id="1_1hc8t"]
+[ext_resource type="PackedScene" uid="uid://c608nkbyptqlw" path="res://parts/fuel_tank/fuel_tank.tscn" id="2_ikpit"]
+[ext_resource type="PackedScene" uid="uid://ypqliy7yc5vr" path="res://parts/engine/engine.tscn" id="3_pka6n"]
+
+[node name="Vab Scene" type="Node3D" node_paths=PackedStringArray("cameraAnchor", "camera", "fuelTankButton", "engineButton", "symmetryButton")]
+script = ExtResource("1_1hc8t")
+cameraAnchor = NodePath("Camera Anchor")
+camera = NodePath("Camera Anchor/Camera")
+fuelTankButton = NodePath("Control/Fuel Tank Button")
+fuelTankPrefab = ExtResource("2_ikpit")
+engineButton = NodePath("Control/EngineButton")
+enginePrefab = ExtResource("3_pka6n")
+symmetryButton = NodePath("Control/Symmetry Button")
+
+[node name="Camera Anchor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, -4.76837e-07)
+
+[node name="Camera" type="Camera3D" parent="Camera Anchor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+
+[node name="Light" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 3, 3, 3)
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Fuel Tank Button" type="Button" parent="Control"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Fuel Tank
+"
+
+[node name="EngineButton" type="Button" parent="Control"]
+layout_mode = 0
+offset_top = 32.0
+offset_right = 83.0
+offset_bottom = 63.0
+text = "Engine
+"
+
+[node name="Symmetry Button" type="Button" parent="Control"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 155.0
+grow_vertical = 0
+text = "Symmetry: [Status]"

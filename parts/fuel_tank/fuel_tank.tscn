@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://c608nkbyptqlw"]
+
+[ext_resource type="Script" path="res://parts/Part.cs" id="1_pmh1m"]
+[ext_resource type="ArrayMesh" uid="uid://boxei7xy1db2v" path="res://parts/fuel_tank/fuel_tank.obj" id="2_f0n7t"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_e4b0q"]
+radius = 0.625
+
+[node name="Fuel Tank" type="RigidBody3D" node_paths=PackedStringArray("radialAttachmentPoint")]
+freeze = true
+script = ExtResource("1_pmh1m")
+radialAttachmentPoint = NodePath("Radial Attach Point")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_f0n7t")
+skeleton = NodePath("")
+
+[node name="Collision Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("CylinderShape3D_e4b0q")
+
+[node name="Radial Attach Point" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.625)

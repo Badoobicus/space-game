@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0m7uy1hq4dtd"]
+
+[ext_resource type="Script" path="res://Game.cs" id="1_gru5i"]
+[ext_resource type="PackedScene" uid="uid://cc7d323b5uql3" path="res://vab/vab_scene.tscn" id="2_ug0f4"]
+
+[node name="Game" type="Node"]
+script = ExtResource("1_gru5i")
+startingScene = ExtResource("2_ug0f4")

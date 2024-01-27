@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgmhq8p3ks6nj"]
+
+[ext_resource type="Script" path="res://world/World.cs" id="1_p8ulu"]
+
+[node name="world_scene" type="Node3D" node_paths=PackedStringArray("sphere1", "sphere2", "sphere3")]
+script = ExtResource("1_p8ulu")
+sphere1 = NodePath("CSGSphere3D")
+sphere2 = NodePath("CSGSphere3D2")
+sphere3 = NodePath("CSGSphere3D3")
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 5, 5, 5)
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+
+[node name="CSGSphere3D2" type="CSGSphere3D" parent="."]
+
+[node name="CSGSphere3D3" type="CSGSphere3D" parent="."]

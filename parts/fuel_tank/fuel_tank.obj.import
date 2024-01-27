@@ -1,0 +1,21 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://boxei7xy1db2v"
+path="res://.godot/imported/fuel_tank.obj-7cb59b3698f90551847c5d19abe534a5.mesh"
+
+[deps]
+
+files=["res://.godot/imported/fuel_tank.obj-7cb59b3698f90551847c5d19abe534a5.mesh"]
+
+source_file="res://parts/fuel_tank/fuel_tank.obj"
+dest_files=["res://.godot/imported/fuel_tank.obj-7cb59b3698f90551847c5d19abe534a5.mesh", "res://.godot/imported/fuel_tank.obj-7cb59b3698f90551847c5d19abe534a5.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
