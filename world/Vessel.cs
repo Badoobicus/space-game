@@ -1,15 +1,12 @@
 using Godot;
 using System;
 
-public partial class CelestialBody : Node3D
+public partial class Vessel : Node3D
 {
-    public double Radius { get; set; }
-    public double Mass { get; set; }
     public Orbit Orbit { get; set; }
 
     public void Move(World world)
     {
-        this.Scale = Vector3.One * (float)this.Radius;
         if (this.Orbit != null)
         {
             OrbitalState state = this.Orbit.GetStateAtTime(world.ElapsedTime);

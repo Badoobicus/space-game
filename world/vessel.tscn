@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3jg80qxo56ks"]
+
+[ext_resource type="Script" path="res://world/VesselOld.cs" id="1_aox4d"]
+
+[node name="Vessel" type="CSGBox3D"]
+script = ExtResource("1_aox4d")

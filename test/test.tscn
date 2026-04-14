@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1jvafwx8fj01"]
+
+[ext_resource type="Script" path="res://test/ChebychevDrawer.cs" id="1_6hnyg"]
+[ext_resource type="PackedScene" uid="uid://b5401o3lfrfsj" path="res://world/celestial_body.tscn" id="2_jxhwa"]
+
+[node name="Test" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6hnyg")
+celestialBodyPrefab = ExtResource("2_jxhwa")

@@ -1,21 +1,65 @@
-[gd_scene load_steps=2 format=3 uid="uid://cgmhq8p3ks6nj"]
+[gd_scene load_steps=7 format=3 uid="uid://pw7etexdf4lu"]
 
 [ext_resource type="Script" path="res://world/World.cs" id="1_p8ulu"]
+[ext_resource type="PackedScene" uid="uid://b5401o3lfrfsj" path="res://world/celestial_body.tscn" id="2_vxgg0"]
+[ext_resource type="Script" path="res://world/CameraController.cs" id="3_852gs"]
+[ext_resource type="PackedScene" uid="uid://c3jg80qxo56ks" path="res://world/vessel.tscn" id="3_rhv0q"]
+[ext_resource type="Script" path="res://world/WorldUi.cs" id="5_dju77"]
+[ext_resource type="Script" path="res://world/OrbitLineDrawer.cs" id="6_x2uyc"]
 
-[node name="world_scene" type="Node3D" node_paths=PackedStringArray("sphere1", "sphere2", "sphere3")]
+[node name="World" type="Node3D"]
 script = ExtResource("1_p8ulu")
-sphere1 = NodePath("CSGSphere3D")
-sphere2 = NodePath("CSGSphere3D2")
-sphere3 = NodePath("CSGSphere3D3")
+celestialBodyPrefab = ExtResource("2_vxgg0")
+vesselPrefab = ExtResource("3_rhv0q")
 
 [node name="Camera" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+script = ExtResource("3_852gs")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="Light" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 5, 5, 5)
 
-[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+[node name="World UI" type="Control" parent="." node_paths=PackedStringArray("world", "elapsedTimeLabel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_dju77")
+world = NodePath("..")
+elapsedTimeLabel = NodePath("Elapsed Time Label")
 
-[node name="CSGSphere3D2" type="CSGSphere3D" parent="."]
+[node name="Orbit Line Drawer" type="Control" parent="World UI" node_paths=PackedStringArray("camera", "world", "xVelocityInput", "yVelocityInput", "zVelocityInput")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("6_x2uyc")
+camera = NodePath("../../Camera")
+world = NodePath("../..")
+xVelocityInput = NodePath("../X Velocity Input")
+yVelocityInput = NodePath("../Y Velocity Input")
+zVelocityInput = NodePath("../Z Velocity Input")
 
-[node name="CSGSphere3D3" type="CSGSphere3D" parent="."]
+[node name="Elapsed Time Label" type="Label" parent="World UI"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "[Elapsed Time]"
+
+[node name="X Velocity Input" type="TextEdit" parent="World UI"]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 160.0
+offset_bottom = 80.0
+
+[node name="Y Velocity Input" type="TextEdit" parent="World UI"]
+layout_mode = 0
+offset_top = 80.0
+offset_right = 160.0
+offset_bottom = 120.0
+
+[node name="Z Velocity Input" type="TextEdit" parent="World UI"]
+layout_mode = 0
+offset_top = 120.0
+offset_right = 160.0
+offset_bottom = 160.0

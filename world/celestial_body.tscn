@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b5401o3lfrfsj"]
+
+[ext_resource type="Script" path="res://world/CelestialBody.cs" id="1_30vbh"]
+
+[node name="CelestialBody" type="CSGSphere3D"]
+script = ExtResource("1_30vbh")

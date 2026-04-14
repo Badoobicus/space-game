@@ -5,62 +5,161 @@ using System.Collections.Generic;
 public partial class World : Node
 {
     [Export]
-    private Node3D sphere1;
+    private PackedScene celestialBodyPrefab;
 
     [Export]
-    private Node3D sphere2;
+    private PackedScene vesselPrefab;
 
-    [Export]
-    private Node3D sphere3;
+    [Signal]
+    public delegate void WorldReadyEventHandler();
 
     private List<CelestialBody> celestialBodies = new List<CelestialBody>();
+    public List<CelestialBody> CelestialBodies
+    {
+        get => new List<CelestialBody>(this.celestialBodies);
+    }
+    private List<VesselOld> vessels = new List<VesselOld>();
+    public List<VesselOld> Vessels
+    {
+        get => new List<VesselOld>(this.vessels);
+    }
+    public double TimeWarp { get; set; } = 1;
+
+    private double elapsedTime = 130;
+
+    // private double elapsedTime = 0;
+    public double ElapsedTime
+    {
+        get => this.elapsedTime;
+    }
+    private const double TIME_WARP_STEP_FACTOR = 10;
+    private const double TIME_WARP_MIN = 0.01;
+    private const double TIME_WARP_MAX = 1_000_000;
 
     public override void _Ready()
     {
-        var star = new CelestialBody();
-        star.Radius = 5;
-        star.Mass = 1;
+        // CelestialBody star = this.celestialBodyPrefab.Instantiate<CelestialBody>();
+        // this.AddChild(star);
+        // star.Radius = 5;
+        // star.Mass =  20;
+        // celestialBodies.Add(star);
 
-        var planet1 = new CelestialBody();
+        CelestialBody star = this.celestialBodyPrefab.Instantiate<CelestialBody>();
+        this.AddChild(star);
+        star.Radius = 5;
+        star.Mass = 2000;
+        celestialBodies.Add(star);
+
+        CelestialBody planet1 = this.celestialBodyPrefab.Instantiate<CelestialBody>();
+        this.AddChild(planet1);
         planet1.Radius = 1;
         planet1.Mass = 1;
-        planet1.Orbit = new Orbit();
-        planet1.Orbit.CelestialBody = star;
-        planet1.Orbit.SemiMajorAxis = 5;
-        planet1.Orbit.Eccentricity = 0;
-        planet1.Orbit.Inclination = 0;
-        planet1.Orbit.ArgumentOfPeriapsis = 0;
-        planet1.Orbit.LongitudeOfAscendingNode = 0;
+        planet1.Orbit = new Orbit(
+            new OrbitalParameters
+            {
+                CentralBody = star,
+                SemiMajorAxis = 15,
+                Eccentricity = 0.9,
+                Inclination = 0,
+                ArgumentOfPeriapsis = 0,
+                LongitudeOfAscendingNode = 0,
+            }
+        );
+        celestialBodies.Add(planet1);
 
-        var moon1 = new CelestialBody();
+        CelestialBody moon1 = this.celestialBodyPrefab.Instantiate<CelestialBody>();
+        this.AddChild(moon1);
         moon1.Radius = 0.33;
         moon1.Mass = 1;
-        moon1.Orbit = new Orbit();
-        moon1.Orbit.CelestialBody = planet1;
-        moon1.Orbit.SemiMajorAxis = 1;
-        moon1.Orbit.Eccentricity = 0;
-        moon1.Orbit.Inclination = 0;
-        moon1.Orbit.ArgumentOfPeriapsis = 0;
-        moon1.Orbit.LongitudeOfAscendingNode = 0;
-
-        celestialBodies.Add(star);
-        celestialBodies.Add(planet1);
+        moon1.Orbit = new Orbit(
+            new OrbitalParameters
+            {
+                CentralBody = planet1,
+                SemiMajorAxis = 3,
+                Eccentricity = 0,
+                Inclination = 0,
+                ArgumentOfPeriapsis = 0,
+                LongitudeOfAscendingNode = 0,
+            }
+        );
         celestialBodies.Add(moon1);
+
+        CelestialBody planet2 = this.celestialBodyPrefab.Instantiate<CelestialBody>();
+        this.AddChild(planet2);
+        planet2.Radius = 1.5;
+        planet2.Mass = 1;
+        planet2.Orbit = new Orbit(
+            new OrbitalParameters
+            {
+                CentralBody = star,
+                SemiMajorAxis = 40,
+                Eccentricity = 0.2,
+                Inclination = 0,
+                ArgumentOfPeriapsis = 0,
+                LongitudeOfAscendingNode = 0,
+            }
+        );
+        celestialBodies.Add(planet2);
+
+        VesselOld vessel1 = this.vesselPrefab.Instantiate<VesselOld>();
+        this.AddChild(vessel1);
+        vessel1.Orbit = new EllipticalOrbit
+        {
+            CelestialBody = star,
+            SemiMajorAxis = 20,
+            Eccentricity = 0.8,
+            Inclination = 45 % (Math.PI * 2),
+            ArgumentOfPeriapsis = 0,
+            LongitudeOfAscendingNode = 0
+        };
+        vessels.Add(vessel1);
+
+        VesselOld vessel2 = this.vesselPrefab.Instantiate<VesselOld>();
+        this.AddChild(vessel2);
+        vessel2.Orbit = new EllipticalOrbit
+        {
+            CelestialBody = star,
+            SemiMajorAxis = 20,
+            Eccentricity = 0,
+            Inclination = 0,
+            ArgumentOfPeriapsis = 0,
+            LongitudeOfAscendingNode = 0
+        };
+        vessels.Add(vessel2);
+
+        this.EmitSignal("WorldReady");
+    }
+
+    public override void _Process(double delta)
+    {
+        if (Input.IsActionJustPressed("increase_time_warp"))
+        {
+            this.TimeWarp = Math.Min(this.TimeWarp * TIME_WARP_STEP_FACTOR, TIME_WARP_MAX);
+        }
+
+        if (Input.IsActionJustPressed("decrease_time_warp"))
+        {
+            this.TimeWarp = Math.Max(this.TimeWarp / TIME_WARP_STEP_FACTOR, TIME_WARP_MIN);
+        }
+
+        if (Input.IsActionJustPressed("clear_time_warp"))
+        {
+            this.TimeWarp = 1;
+        }
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        double time = Time.GetUnixTimeFromSystem() * 10;
+        foreach (CelestialBody celestialBody in this.celestialBodies)
+        {
+            celestialBody.Move(this);
+        }
 
-        this.sphere1.Scale = Vector3.One * (float)this.celestialBodies[0].Radius;
-        this.sphere1.Position = Vector3.Zero;
+        foreach (VesselOld vessel in this.vessels)
+        {
+            vessel.Move(this);
+        }
 
-        this.sphere2.Scale = Vector3.One * (float)this.celestialBodies[1].Radius;
-        this.sphere2.Position =
-            this.sphere1.Position + this.celestialBodies[1].Orbit.GetPositionAtTime(time);
-
-        this.sphere3.Scale = Vector3.One * (float)this.celestialBodies[2].Radius;
-        this.sphere3.Position =
-            this.sphere2.Position + this.celestialBodies[2].Orbit.GetPositionAtTime(time);
+        this.elapsedTime += delta * this.TimeWarp;
     }
 }
