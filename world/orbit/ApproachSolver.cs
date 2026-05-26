@@ -36,8 +36,8 @@ public class ApproachSolver
             double subjectAltitude = subjectPosition.Length();
             double targetAltitude = targetPosition.Length();
 
-            Vector3 relativePosition = targetPosition - subjectPosition;
-            Vector3 relativeVelocity = targetVelocity - subjectVelocity;
+            Vector3d relativePosition = targetPosition - subjectPosition;
+            Vector3d relativeVelocity = targetVelocity - subjectVelocity;
             double d = relativePosition.Dot(relativeVelocity);
 
             double distanceSq = (subjectPosition - targetPosition).Length();

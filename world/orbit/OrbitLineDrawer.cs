@@ -43,7 +43,7 @@ public partial class OrbitLineDrawer : Control
             {
                 double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
                 var (finalPos, _) = solver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
-                var finalFinalPos = orbit.Body.Position + finalPos;
+                var finalFinalPos = (Vector3)(orbit.Body.Position + finalPos);
                 if (!_camera.IsPositionBehind(finalFinalPos))
                 {
                     Vector2 cameraPos = _camera.UnprojectPosition(finalFinalPos);
@@ -74,8 +74,10 @@ public partial class OrbitLineDrawer : Control
             return;
         }
 
-        var (pos1, _) = solver1.SolveStateAtTime(timeOfClosestApproach);
-        var (pos2, _) = solver2.SolveStateAtTime(timeOfClosestApproach);
+        var state3 = solver1.SolveStateAtTime(timeOfClosestApproach);
+        Vector3 pos1 = (Vector3)state3.Item1;
+        var state4 = solver2.SolveStateAtTime(timeOfClosestApproach);
+        Vector3 pos2 = (Vector3)state4.Item1;
 
         if (!_camera.IsPositionBehind(pos1))
         {
@@ -100,7 +102,8 @@ public partial class OrbitLineDrawer : Control
             var orbit = body.Orbit;
             var state = EllipticalOrbitSolver.SolveState(orbit, 0);
             var solver = OrbitSolver.FromInitialState(orbit.Body.Mass, state[0], state[1], 0);
-            var (_, velocity) = solver.SolveStateAtTime(_world.GetTime());
+            var state2 = solver.SolveStateAtTime(_world.GetTime());
+            var velocity = (Vector3)state2.Item2;
             var from = body.Position;
             var to = from + velocity;
 

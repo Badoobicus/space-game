@@ -11,13 +11,13 @@ public class OrbitSolver
     private readonly double _M;
 
     /// r_0 - initial position
-    private readonly Vector3 _r0;
+    private readonly Vector3d _r0;
 
     /// ||r_0|| - magnitude of initial position
     private readonly double _r0Mag;
 
     /// v_0 - initial velocity
-    private readonly Vector3 _v0;
+    private readonly Vector3d _v0;
 
     /// ||v_0||^2 - squared magnitude of initial velocity
     private readonly double _v0MagSq;
@@ -42,8 +42,8 @@ public class OrbitSolver
 
     private OrbitSolver(
         double mainBodyMass,
-        Vector3 initialPosition,
-        Vector3 initialVelocity,
+        Vector3d initialPosition,
+        Vector3d initialVelocity,
         double epoch
     )
     {
@@ -62,9 +62,7 @@ public class OrbitSolver
         var a = 1 / _alpha;
         Period = Math.PI * 2 * a * Math.Sqrt(a / _mu);
 
-        // TODO convert to Vector3d (and all other orbital math to use doubles across the board)
-        Vector3 eccentricityVector =
-            ((float)(_v0MagSq - (_mu / _r0Mag)) * _r0 - (float)_r0DotV0 * _v0) / (float)_mu;
+        Vector3d eccentricityVector = ((_v0MagSq - (_mu / _r0Mag)) * _r0 - _r0DotV0 * _v0) / _mu;
         double e = eccentricityVector.Length();
 
         if (e < 1)
@@ -79,13 +77,13 @@ public class OrbitSolver
         }
     }
 
-    public (Vector3, Vector3) SolveStateAtTime(double time)
+    public (Vector3d, Vector3d) SolveStateAtTime(double time)
     {
         double chi = _SolveUniversalAnomalyAtTime(time);
         return _SolveStateAtUniversalAnomaly(chi);
     }
 
-    public (Vector3, Vector3) SolveStateAtEccentricAnomaly(double eccentricAnomaly)
+    public (Vector3d, Vector3d) SolveStateAtEccentricAnomaly(double eccentricAnomaly)
     {
         return _SolveStateAtUniversalAnomaly(eccentricAnomaly / _sqrtAlpha);
     }
@@ -138,7 +136,7 @@ public class OrbitSolver
         return chi;
     }
 
-    private (Vector3, Vector3) _SolveStateAtUniversalAnomaly(double chi)
+    private (Vector3d, Vector3d) _SolveStateAtUniversalAnomaly(double chi)
     {
         double z = _alpha * chi * chi;
         double chiSq = chi * chi;
@@ -150,7 +148,7 @@ public class OrbitSolver
         double g = _r0Mag * chi * (1 - z * c3) / _sqrtMu + _r0DotV0 * chiSq * c2 / _mu;
 
         // calculate final position
-        Vector3 rNext = (float)f * _r0 + (float)g * _v0;
+        Vector3d rNext = f * _r0 + g * _v0;
         double rNextMag = rNext.Length();
 
         // calculate f-dot and g-dot
@@ -158,7 +156,7 @@ public class OrbitSolver
         double gDot = 1 - (chiSq / rNextMag) * c2;
 
         // calculate final velocity
-        Vector3 vNext = (float)fDot * _r0 + (float)gDot * _v0;
+        Vector3d vNext = (float)fDot * _r0 + (float)gDot * _v0;
 
         return (rNext, vNext);
     }
@@ -265,8 +263,8 @@ public class OrbitSolver
 
     public static OrbitSolver FromInitialState(
         double mainBodyMass,
-        Vector3 initialPosition,
-        Vector3 initialVelocity,
+        Vector3d initialPosition,
+        Vector3d initialVelocity,
         double epoch
     )
     {

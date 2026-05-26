@@ -1,3 +1,6 @@
+using System;
+using Godot;
+
 public struct Vector3d
 {
     public double X;
@@ -11,23 +14,33 @@ public struct Vector3d
         Z = z;
     }
 
-    public static Vector3d operator +(Vector3d v1, Vector3d v2)
-    {
-        return new Vector3d(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
-    }
+    public readonly double Length() => Math.Sqrt(X * X + Y * Y + Z * Z);
 
-    public static Vector3d operator -(Vector3d v1, Vector3d v2)
-    {
-        return new Vector3d(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
-    }
+    public readonly double LengthSquared() => X * X + Y * Y + Z * Z;
 
-    public static Vector3d operator *(Vector3d v, double s)
-    {
-        return new Vector3d(v.X * s, v.Y * s, v.Z * s);
-    }
+    public readonly double Dot(Vector3d v) => X * v.X + Y * v.Y + Z * v.Z;
 
-    public static Vector3d operator /(Vector3d v, double s)
-    {
-        return new Vector3d(v.X / s, v.Y / s, v.Z / s);
-    }
+    public readonly Vector3d Cross(Vector3d v) =>
+        new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+
+    public readonly double AngleTo(Vector3d to) =>
+        Math.Atan2(this.Cross(to).Length(), this.Dot(to));
+
+    public static Vector3d operator +(Vector3d v1, Vector3d v2) =>
+        new(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+
+    public static Vector3d operator -(Vector3d v1, Vector3d v2) =>
+        new(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
+
+    public static Vector3d operator *(Vector3d v, double s) => new(v.X * s, v.Y * s, v.Z * s);
+
+    public static Vector3d operator *(double s, Vector3d v) => new(v.X * s, v.Y * s, v.Z * s);
+
+    public static Vector3d operator /(Vector3d v, double s) => new(v.X / s, v.Y / s, v.Z / s);
+
+    public static implicit operator Vector3d(Vector3 godotVec) =>
+        new(godotVec.X, godotVec.Y, godotVec.Z);
+
+    public static explicit operator Vector3(Vector3d customVec) =>
+        new((float)customVec.X, (float)customVec.Y, (float)customVec.Z);
 }

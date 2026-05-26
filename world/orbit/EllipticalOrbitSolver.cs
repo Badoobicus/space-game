@@ -11,7 +11,7 @@ public class EllipticalOrbitSolver
 
     private const double TwoPi = Math.PI * 2;
 
-    public static Vector3[] SolveState(Orbit orbit, double time)
+    public static Vector3d[] SolveState(Orbit orbit, double time)
     {
         double a = orbit.SemiMajorAxis;
         double e = orbit.Eccentricity;
@@ -40,7 +40,7 @@ public class EllipticalOrbitSolver
         return SolveStateFromAnomalies(orbit, E, v);
     }
 
-    public static Vector3[] SolveStateFromTrueAnomaly(Orbit orbit, double trueAnomaly)
+    public static Vector3d[] SolveStateFromTrueAnomaly(Orbit orbit, double trueAnomaly)
     {
         double e = orbit.Eccentricity;
         double v = WrapAngle(trueAnomaly);
@@ -51,7 +51,7 @@ public class EllipticalOrbitSolver
         return SolveStateFromAnomalies(orbit, E, v);
     }
 
-    private static Vector3[] SolveStateFromAnomalies(
+    private static Vector3d[] SolveStateFromAnomalies(
         Orbit orbit,
         double eccentricAnomaly,
         double trueAnomaly
@@ -72,8 +72,8 @@ public class EllipticalOrbitSolver
         double vx = vs * -Math.Sin(E);
         double vy = vs * Math.Sqrt(1 - e * e) * Math.Cos(E);
 
-        Vector3 position = OrbitalToInertial(px, py, orbit);
-        Vector3 velocity = OrbitalToInertial(vx, vy, orbit);
+        Vector3d position = OrbitalToInertial(px, py, orbit);
+        Vector3d velocity = OrbitalToInertial(vx, vy, orbit);
 
         return new[] { position, velocity };
     }
@@ -83,7 +83,7 @@ public class EllipticalOrbitSolver
         return ((radians % TwoPi) + TwoPi) % TwoPi;
     }
 
-    private static Vector3 OrbitalToInertial(double x, double y, Orbit orbit)
+    private static Vector3d OrbitalToInertial(double x, double y, Orbit orbit)
     {
         double lan = orbit.LongitudeOfAscendingNode;
         double inc = orbit.Inclination;
@@ -109,6 +109,6 @@ public class EllipticalOrbitSolver
         double yInertial = x * r21 + y * r22;
         double zInertial = x * r31 + y * r32;
 
-        return new Vector3((float)xInertial, (float)zInertial, (float)yInertial);
+        return new Vector3d(xInertial, zInertial, yInertial);
     }
 }
