@@ -23,6 +23,7 @@ obj/
 *.user
 *.userosscache
 *.sln.docstates
+*.DotSettings.user
 .idea/
 .vscode/
 .DS_Store
