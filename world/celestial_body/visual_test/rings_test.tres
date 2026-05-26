@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cmemtvxhdlqx1"]
+
+[ext_resource type="Shader" uid="uid://cb20t82ntywuk" path="res://world/celestial_body/visual_test/rings_test.gdshader" id="1_0i5ns"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_0i5ns")

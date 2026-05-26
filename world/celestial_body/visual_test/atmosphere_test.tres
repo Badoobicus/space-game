@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cryqo8isltbp2"]
+
+[ext_resource type="Shader" uid="uid://b6i2vdmueht4a" path="res://world/celestial_body/visual_test/atmosphere_test.gdshader" id="1_0kclv"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_0kclv")
+shader_parameter/atmosphere_color = Color(0.3, 0.7, 1, 1)
+shader_parameter/thickness = 2.0
+shader_parameter/halo_spread = 1.5
+shader_parameter/expansion = 1.0

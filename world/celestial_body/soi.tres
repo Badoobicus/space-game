@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://6hov3l7h5tfj"]
+
+[ext_resource type="Shader" uid="uid://bulm6r2i0dftt" path="res://world/celestial_body/soi.gdshader" id="1_71gx3"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_71gx3")

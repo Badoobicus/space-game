@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://cvvw54li63kqx"]
+
+[ext_resource type="Material" uid="uid://cryqo8isltbp2" path="res://world/celestial_body/visual_test/atmosphere_test.tres" id="1_qs4ye"]
+[ext_resource type="Material" uid="uid://cmemtvxhdlqx1" path="res://world/celestial_body/visual_test/rings_test.tres" id="2_8xljn"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_8xljn"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_wm507"]
+
+[sub_resource type="Environment" id="Environment_qs4ye"]
+background_mode = 1
+
+[node name="CelestialBodyVisual" type="Node3D" unique_id=963093932]
+
+[node name="CSGSphere3D2" type="MeshInstance3D" parent="." unique_id=743946526]
+mesh = SubResource("SphereMesh_8xljn")
+
+[node name="CSGSphere3D" type="MeshInstance3D" parent="." unique_id=163288595]
+transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, 0, 0, 0)
+mesh = SubResource("SphereMesh_wm507")
+surface_material_override/0 = ExtResource("1_qs4ye")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1754754563]
+environment = SubResource("Environment_qs4ye")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="." unique_id=1881340179]
+radius = 2.0
+height = 0.001
+sides = 64
+material = ExtResource("2_8xljn")
