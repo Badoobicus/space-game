@@ -1,22 +1,29 @@
-# Godot 4+ specific ignores
+# Godot Engine
 .godot/
-
-# Godot-specific ignores
 .import/
-export.cfg
-export_presets.cfg
-
-# Imported translations (automatically generated from CSV files)
+.nomedia/
+*.tmp
 *.translation
 
-# Mono-specific ignores
+# Godot Exports
+export.cfg
+export_presets.cfg
+export_credentials.cfg
+
+# Godot Mono
 .mono/
 data_*/
 mono_crash.*.json
+bin/
+obj/
 
-# Visual Studio-specific ignores
-.vs/
-
-# Project-specific ignores
-build/
-*.blend?
+# IDE, Solutions, and OS Metadata
+.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
