@@ -30,8 +30,8 @@ public partial class OrbitLineDrawer : Control
             }
 
             var orbit = body.Orbit;
-            var state = EllipticalOrbitSolver.SolveState(orbit, 0);
-            var solver = OrbitSolver.FromInitialState(orbit.Body.Mass, state[0], state[1], 0);
+            var initialState = EllipticalOrbitSolver.SolveState(orbit, 0);
+            var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
 
             int resolution = 100;
 
@@ -42,11 +42,11 @@ public partial class OrbitLineDrawer : Control
             for (int i = 0; i < resolution; i++)
             {
                 double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
-                var (finalPos, _) = solver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
-                var finalFinalPos = (Vector3)(orbit.Body.Position + finalPos);
-                if (!_camera.IsPositionBehind(finalFinalPos))
+                var state = solver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
+                var pos = (Vector3)(orbit.Body.Position + state.Position);
+                if (!_camera.IsPositionBehind(pos))
                 {
-                    Vector2 cameraPos = _camera.UnprojectPosition(finalFinalPos);
+                    Vector2 cameraPos = _camera.UnprojectPosition(pos);
                     DrawCircle(cameraPos, 2, Colors.Aqua);
                 }
             }
@@ -56,12 +56,12 @@ public partial class OrbitLineDrawer : Control
     private void _DrawClosestApproach()
     {
         var orbit1 = _world.GetCelestialBodies()[3].Orbit;
-        var state1 = EllipticalOrbitSolver.SolveState(orbit1, 0);
-        var solver1 = OrbitSolver.FromInitialState(orbit1.Body.Mass, state1[0], state1[1], 0);
+        var initialState1 = EllipticalOrbitSolver.SolveState(orbit1, 0);
+        var solver1 = OrbitSolver.FromInitialState(initialState1, orbit1.Body.Mass, 0);
 
         var orbit2 = _world.GetCelestialBodies()[1].Orbit;
-        var state2 = EllipticalOrbitSolver.SolveState(orbit2, 0);
-        var solver2 = OrbitSolver.FromInitialState(orbit2.Body.Mass, state2[0], state2[1], 0);
+        var initialState2 = EllipticalOrbitSolver.SolveState(orbit2, 0);
+        var solver2 = OrbitSolver.FromInitialState(initialState2, orbit2.Body.Mass, 0);
 
         var timeOfClosestApproach = ApproachSolver.SolveClosestApproach(
             orbit1,
@@ -74,10 +74,10 @@ public partial class OrbitLineDrawer : Control
             return;
         }
 
-        var state3 = solver1.SolveStateAtTime(timeOfClosestApproach);
-        Vector3 pos1 = (Vector3)state3.Item1;
-        var state4 = solver2.SolveStateAtTime(timeOfClosestApproach);
-        Vector3 pos2 = (Vector3)state4.Item1;
+        var state1 = solver1.SolveStateAtTime(timeOfClosestApproach);
+        Vector3 pos1 = (Vector3)state1.Position;
+        var state2 = solver2.SolveStateAtTime(timeOfClosestApproach);
+        Vector3 pos2 = (Vector3)state2.Position;
 
         if (!_camera.IsPositionBehind(pos1))
         {
@@ -100,10 +100,10 @@ public partial class OrbitLineDrawer : Control
             }
 
             var orbit = body.Orbit;
-            var state = EllipticalOrbitSolver.SolveState(orbit, 0);
-            var solver = OrbitSolver.FromInitialState(orbit.Body.Mass, state[0], state[1], 0);
-            var state2 = solver.SolveStateAtTime(_world.GetTime());
-            var velocity = (Vector3)state2.Item2;
+            var initialState = EllipticalOrbitSolver.SolveState(orbit, 0);
+            var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
+            var state = solver.SolveStateAtTime(_world.GetTime());
+            var velocity = (Vector3)state.Velocity;
             var from = body.Position;
             var to = from + velocity;
 

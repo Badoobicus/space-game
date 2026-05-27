@@ -98,10 +98,10 @@ public partial class World : Node
             }
 
             var orbit = body.Orbit;
-            var state = EllipticalOrbitSolver.SolveState(orbit, 0);
-            var solver = OrbitSolver.FromInitialState(orbit.Body.Mass, state[0], state[1], 0);
-            var (position, _) = solver.SolveStateAtTime(_time);
-            body.Position = (Vector3)(body.Orbit.Body.Position + position);
+            var initialState = EllipticalOrbitSolver.SolveState(orbit, 0);
+            var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
+            var state = solver.SolveStateAtTime(_time);
+            body.Position = (Vector3)(body.Orbit.Body.Position + state.Position);
         }
     }
 

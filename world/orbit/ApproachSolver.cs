@@ -6,21 +6,15 @@ public class ApproachSolver
 {
     public static double SolveClosestApproach(Orbit subject, Orbit target, double time)
     {
-        var subjectState = EllipticalOrbitSolver.SolveState(subject, time);
-        var targetState = EllipticalOrbitSolver.SolveState(target, time);
+        var initialSubjectState = EllipticalOrbitSolver.SolveState(subject, time);
+        var initialTargetState = EllipticalOrbitSolver.SolveState(target, time);
 
         var subjectSolver = OrbitSolver.FromInitialState(
+            initialSubjectState,
             subject.Body.Mass,
-            subjectState[0],
-            subjectState[1],
             time
         );
-        var targetSolver = OrbitSolver.FromInitialState(
-            target.Body.Mass,
-            targetState[0],
-            targetState[1],
-            time
-        );
+        var targetSolver = OrbitSolver.FromInitialState(initialTargetState, target.Body.Mass, time);
 
         double resultTime = -1;
         double resultDistanceSq = -1;
@@ -30,8 +24,14 @@ public class ApproachSolver
         for (int i = 0; i < steps; i++)
         {
             double t = time + i * (subjectPeriod / steps);
-            var (subjectPosition, subjectVelocity) = subjectSolver.SolveStateAtTime(t);
-            var (targetPosition, targetVelocity) = targetSolver.SolveStateAtTime(t);
+
+            var subjectState = subjectSolver.SolveStateAtTime(t);
+            var subjectPosition = subjectState.Position;
+            var subjectVelocity = subjectState.Velocity;
+
+            var targetState = targetSolver.SolveStateAtTime(t);
+            var targetPosition = targetState.Position;
+            var targetVelocity = targetState.Velocity;
 
             double subjectAltitude = subjectPosition.Length();
             double targetAltitude = targetPosition.Length();

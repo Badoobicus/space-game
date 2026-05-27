@@ -40,17 +40,12 @@ public class OrbitSolver
     /// t0 - epoch
     private readonly double _t0;
 
-    private OrbitSolver(
-        double mainBodyMass,
-        Vector3d initialPosition,
-        Vector3d initialVelocity,
-        double epoch
-    )
+    private OrbitSolver(StateVector stateVector, double mainBodyMass, double epoch)
     {
         _M = mainBodyMass;
-        _r0 = initialPosition;
+        _r0 = stateVector.Position;
         _r0Mag = _r0.Length();
-        _v0 = initialVelocity;
+        _v0 = stateVector.Velocity;
         _v0MagSq = _v0.LengthSquared();
         _r0DotV0 = _r0.Dot(_v0);
         _mu = _M * Constants.GravitationalConstant;
@@ -77,13 +72,13 @@ public class OrbitSolver
         }
     }
 
-    public (Vector3d, Vector3d) SolveStateAtTime(double time)
+    public StateVector SolveStateAtTime(double time)
     {
         double chi = _SolveUniversalAnomalyAtTime(time);
         return _SolveStateAtUniversalAnomaly(chi);
     }
 
-    public (Vector3d, Vector3d) SolveStateAtEccentricAnomaly(double eccentricAnomaly)
+    public StateVector SolveStateAtEccentricAnomaly(double eccentricAnomaly)
     {
         return _SolveStateAtUniversalAnomaly(eccentricAnomaly / _sqrtAlpha);
     }
@@ -136,7 +131,7 @@ public class OrbitSolver
         return chi;
     }
 
-    private (Vector3d, Vector3d) _SolveStateAtUniversalAnomaly(double chi)
+    private StateVector _SolveStateAtUniversalAnomaly(double chi)
     {
         double z = _alpha * chi * chi;
         double chiSq = chi * chi;
@@ -158,7 +153,7 @@ public class OrbitSolver
         // calculate final velocity
         Vector3d vNext = (float)fDot * _r0 + (float)gDot * _v0;
 
-        return (rNext, vNext);
+        return new StateVector(rNext, vNext);
     }
 
     private double _SolveUniversalAnomalyAtRadius(double radius)
@@ -262,12 +257,11 @@ public class OrbitSolver
     }
 
     public static OrbitSolver FromInitialState(
+        StateVector stateVector,
         double mainBodyMass,
-        Vector3d initialPosition,
-        Vector3d initialVelocity,
         double epoch
     )
     {
-        return new OrbitSolver(mainBodyMass, initialPosition, initialVelocity, epoch);
+        return new OrbitSolver(stateVector, mainBodyMass, epoch);
     }
 }
