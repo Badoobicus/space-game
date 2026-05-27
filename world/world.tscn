@@ -43,10 +43,11 @@ text = "[Time]"
 layout_mode = 2
 text = "[Time Warp]"
 
-[node name="World" type="Node3D" parent="." unique_id=2134618394]
+[node name="World" type="Node3D" parent="." unique_id=2134618394 node_paths=PackedStringArray("_camera")]
 process_priority = -99
 process_physics_priority = -99
 script = ExtResource("1_6xmxd")
+_camera = NodePath("Camera")
 _celestialBodyPrefab = ExtResource("2_tcf2h")
 _vesselPrefab = ExtResource("5_fn3g3")
 

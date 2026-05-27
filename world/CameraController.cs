@@ -6,6 +6,7 @@ public partial class CameraController : Camera3D
     private Vector2 _rotation = new Vector2(0, 45);
     private float _zoom = 20;
     private Vector2 _lastMousePosition = Vector2.Zero;
+    private Node3D _focus;
 
     public override void _Process(double delta)
     {
@@ -31,9 +32,16 @@ public partial class CameraController : Camera3D
             _rotation += (mousePosition - _lastMousePosition) * 0.4f * (float)delta;
         }
 
+        var focusPos = _focus?.GlobalPosition ?? Vector3.Zero;
+
         Rotation = new Vector3(-_rotation.Y, -_rotation.X, 0);
-        Position = Basis.Z * (float)Math.Pow(1.15f, _zoom);
+        Position = focusPos + Basis.Z * (float)Math.Pow(1.15f, _zoom);
 
         _lastMousePosition = mousePosition;
+    }
+
+    public void OnMapFocusChange(CelestialBody body)
+    {
+        _focus = body;
     }
 }

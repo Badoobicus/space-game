@@ -1,9 +1,12 @@
-using Godot;
 using System;
 using System.Collections.Generic;
+using Godot;
 
 public partial class World : Node
 {
+    [Export]
+    private CameraController _camera;
+
     [Export]
     private PackedScene _celestialBodyPrefab;
 
@@ -19,16 +22,12 @@ public partial class World : Node
     private double _time;
     private int _timeWarpStep;
     private double _timeWarp;
+    private int _mapFocusIndex;
+
     private readonly List<CelestialBody> _celestialBodies = new();
 
     public override void _Ready()
     {
-        _time = 0;
-        EmitSignalTimeChanged(_time);
-
-        _timeWarp = _CalculateTimeWarp(_timeWarpStep);
-        EmitSignalTimeWarpChange(_timeWarp);
-
         var star = _celestialBodyPrefab.Instantiate<CelestialBody>();
         star.Mass = 100;
         star.Radius = 2;
@@ -83,6 +82,15 @@ public partial class World : Node
         moon3.SoiRadius = OrbitUtils.CalculateSoiRadius(moon3);
         AddChild(moon3);
         _celestialBodies.Add(moon3);
+
+        _time = 0;
+        EmitSignalTimeChanged(_time);
+
+        _timeWarp = _CalculateTimeWarp(_timeWarpStep);
+        EmitSignalTimeWarpChange(_timeWarp);
+
+        _mapFocusIndex = 0;
+        _camera.OnMapFocusChange(_celestialBodies[_mapFocusIndex]);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -108,6 +116,7 @@ public partial class World : Node
     public override void _Input(InputEvent @event)
     {
         var timeWarpChanged = false;
+        var mapFocusChanged = false;
 
         if (@event.IsActionPressed("time_warp_increase"))
         {
@@ -124,11 +133,26 @@ public partial class World : Node
             _timeWarpStep = 0;
             timeWarpChanged = true;
         }
+        else if (@event.IsActionPressed("map_focus_next"))
+        {
+            _mapFocusIndex = (_mapFocusIndex + 1) % _celestialBodies.Count;
+            mapFocusChanged = true;
+        }
+        else if (@event.IsActionPressed("map_focus_prev"))
+        {
+            _mapFocusIndex = (_celestialBodies.Count + _mapFocusIndex - 1) % _celestialBodies.Count;
+            mapFocusChanged = true;
+        }
 
         if (timeWarpChanged)
         {
             _timeWarp = _CalculateTimeWarp(_timeWarpStep);
             EmitSignalTimeWarpChange(_timeWarp);
+        }
+
+        if (mapFocusChanged)
+        {
+            _camera.OnMapFocusChange(_celestialBodies[_mapFocusIndex]);
         }
     }
 
