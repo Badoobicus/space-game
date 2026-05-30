@@ -12,10 +12,18 @@ public partial class UserInterface : Node
     [Export]
     private Label _timeWarpLabel;
 
+    [Export]
+    private Label _fpsLabel;
+
     public override void _Ready()
     {
         _world.TimeChanged += _OnTimeChanged;
         _world.TimeWarpChange += _OnTimeWarpChanged;
+    }
+
+    public override void _Process(double delta)
+    {
+        _fpsLabel.Text = $"FPS: {Engine.GetFramesPerSecond()}";
     }
 
     private void _OnTimeChanged(double time)

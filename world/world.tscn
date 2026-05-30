@@ -18,7 +18,7 @@ script = ExtResource("3_4717r")
 _world = NodePath("../World")
 _camera = NodePath("../World/Camera")
 
-[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_world", "_timeLabel", "_timeWarpLabel")]
+[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_world", "_timeLabel", "_timeWarpLabel", "_fpsLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,6 +29,7 @@ script = ExtResource("5_mmdvd")
 _world = NodePath("../World")
 _timeLabel = NodePath("VBoxContainer/TimeLabel")
 _timeWarpLabel = NodePath("VBoxContainer/TimeWarpLabel")
+_fpsLabel = NodePath("VBoxContainer/FpsLabel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UserInterface" unique_id=430396609]
 layout_mode = 0
@@ -42,6 +43,10 @@ text = "[Time]"
 [node name="TimeWarpLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=830270914]
 layout_mode = 2
 text = "[Time Warp]"
+
+[node name="FpsLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=2003063576]
+layout_mode = 2
+text = "[FPS]"
 
 [node name="World" type="Node3D" parent="." unique_id=2134618394 node_paths=PackedStringArray("_camera")]
 process_priority = -99
