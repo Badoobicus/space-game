@@ -9,15 +9,6 @@
 
 [node name="Node" type="Node" unique_id=1351746466]
 
-[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_world", "_camera")]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("3_4717r")
-_world = NodePath("../World")
-_camera = NodePath("../World/Camera")
-
 [node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_world", "_timeLabel", "_timeWarpLabel", "_fpsLabel")]
 layout_mode = 3
 anchors_preset = 15
@@ -47,6 +38,15 @@ text = "[Time Warp]"
 [node name="FpsLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=2003063576]
 layout_mode = 2
 text = "[FPS]"
+
+[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_world", "_camera")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_4717r")
+_world = NodePath("../World")
+_camera = NodePath("../World/Camera")
 
 [node name="World" type="Node3D" parent="." unique_id=2134618394 node_paths=PackedStringArray("_camera")]
 process_priority = -99

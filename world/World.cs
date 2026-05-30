@@ -14,6 +14,9 @@ public partial class World : Node
     private PackedScene _vesselPrefab;
 
     [Signal]
+    public delegate void CelestialBodiesInitializedEventHandler();
+
+    [Signal]
     public delegate void TimeChangedEventHandler(double time);
 
     [Signal]
@@ -25,10 +28,12 @@ public partial class World : Node
     private int _mapFocusIndex;
 
     private readonly List<CelestialBody> _celestialBodies = new();
+    private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
 
     public override void _Ready()
     {
         var star = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        star.CelestialBodyId = "star";
         star.Mass = 100;
         star.Radius = 2;
         star.SoiRadius = 100;
@@ -36,6 +41,7 @@ public partial class World : Node
         _celestialBodies.Add(star);
 
         var planet1 = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        planet1.CelestialBodyId = "planet1";
         planet1.Orbit = Orbit.FromElements(star, 10, 0.05, 0, 0, 0, 0);
         planet1.Mass = 1;
         planet1.Radius = 0.25;
@@ -44,6 +50,7 @@ public partial class World : Node
         _celestialBodies.Add(planet1);
 
         var moon1 = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        moon1.CelestialBodyId = "moon1";
         moon1.Orbit = Orbit.FromElements(planet1, 1, 0, 0, 0, 0, 0);
         moon1.Mass = 0.05;
         moon1.Radius = 0.05;
@@ -52,6 +59,7 @@ public partial class World : Node
         _celestialBodies.Add(moon1);
 
         var planet2 = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        planet2.CelestialBodyId = "planet2";
         planet2.Orbit = Orbit.FromElements(
             star,
             30,
@@ -68,6 +76,7 @@ public partial class World : Node
         _celestialBodies.Add(planet2);
 
         var moon2 = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        moon2.CelestialBodyId = "moon2";
         moon2.Orbit = Orbit.FromElements(planet2, 1, 0, 0, 0, 0, 0);
         moon2.Mass = 0.05;
         moon2.Radius = 0.05;
@@ -76,12 +85,20 @@ public partial class World : Node
         _celestialBodies.Add(moon2);
 
         var moon3 = _celestialBodyPrefab.Instantiate<CelestialBody>();
+        moon3.CelestialBodyId = "moon3";
         moon3.Orbit = Orbit.FromElements(planet2, 3, 0.1, Mathf.DegToRad(-5), 0, 0, 0);
         moon3.Mass = 0.05;
         moon3.Radius = 0.05;
         moon3.SoiRadius = OrbitUtils.CalculateSoiRadius(moon3);
         AddChild(moon3);
         _celestialBodies.Add(moon3);
+
+        foreach (var celestialBody in _celestialBodies)
+        {
+            _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
+        }
+
+        EmitSignalCelestialBodiesInitialized();
 
         _time = 0;
         EmitSignalTimeChanged(_time);
@@ -154,6 +171,11 @@ public partial class World : Node
         {
             _camera.OnMapFocusChange(_celestialBodies[_mapFocusIndex]);
         }
+    }
+
+    public CelestialBody GetCelestialBody(string celestialBodyId)
+    {
+        return _celestialBodiesById.GetValueOrDefault(celestialBodyId, null);
     }
 
     public List<CelestialBody> GetCelestialBodies()

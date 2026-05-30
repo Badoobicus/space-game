@@ -9,10 +9,12 @@ public partial class CelestialBody : Node3D
     [Export]
     private Node3D _soiMesh;
 
+    public string CelestialBodyId { get; set; }
     public double Mass { get; set; }
     public Orbit Orbit { get; set; }
 
     private double _radius;
+
     public double Radius
     {
         get => _radius;
@@ -24,6 +26,7 @@ public partial class CelestialBody : Node3D
     }
 
     private double _soiRadius;
+
     public double SoiRadius
     {
         get => _soiRadius;

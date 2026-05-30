@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 
 public partial class OrbitLineDrawer : Control
@@ -8,6 +9,13 @@ public partial class OrbitLineDrawer : Control
     [Export]
     private Camera3D _camera;
 
+    private Dictionary<string, MeshInstance3D> _orbitLineMeshesByCelestialBodyId = new();
+
+    public override void _Ready()
+    {
+        _world.CelestialBodiesInitialized += _GenerateOrbitLineMeshes;
+    }
+
     public override void _Process(double delta)
     {
         QueueRedraw();
@@ -15,13 +23,19 @@ public partial class OrbitLineDrawer : Control
 
     public override void _Draw()
     {
-        _DrawOrbits();
+        _UpdateOrbitLinePositions();
         _DrawClosestApproach();
         _DrawVelocities();
     }
 
-    private void _DrawOrbits()
+    private void _GenerateOrbitLineMeshes()
     {
+        var material = new StandardMaterial3D
+        {
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            AlbedoColor = Colors.Aqua,
+        };
+
         foreach (var body in _world.GetCelestialBodies())
         {
             if (body.Orbit == null)
@@ -29,27 +43,39 @@ public partial class OrbitLineDrawer : Control
                 continue;
             }
 
+            var meshInstance = new MeshInstance3D();
+            var immediateMesh = new ImmediateMesh();
+            immediateMesh.ClearSurfaces();
+            immediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip, material);
+
             var orbit = body.Orbit;
             var initialState = EllipticalOrbitSolver.SolveState(orbit, 0);
             var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
 
             int resolution = 100;
 
-            var material = new StandardMaterial3D();
-            material.ShadingMode = StandardMaterial3D.ShadingModeEnum.Unshaded;
-            material.AlbedoColor = new Color(0, 1, 1);
-
-            for (int i = 0; i < resolution; i++)
+            for (int i = 0; i <= resolution; i++)
             {
                 double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
                 var state = solver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
                 var pos = (Vector3)(orbit.Body.Position + state.Position);
-                if (!_camera.IsPositionBehind(pos))
-                {
-                    Vector2 cameraPos = _camera.UnprojectPosition(pos);
-                    DrawCircle(cameraPos, 2, Colors.Aqua);
-                }
+                immediateMesh.SurfaceAddVertex(pos);
             }
+
+            immediateMesh.SurfaceEnd();
+            meshInstance.Mesh = immediateMesh;
+            meshInstance.MaterialOverride = material;
+            _world.AddChild(meshInstance);
+
+            _orbitLineMeshesByCelestialBodyId.Add(body.CelestialBodyId, meshInstance);
+        }
+    }
+
+    private void _UpdateOrbitLinePositions()
+    {
+        foreach (var (celestialBodyId, meshInstance) in _orbitLineMeshesByCelestialBodyId)
+        {
+            meshInstance.Position = _world.GetCelestialBody(celestialBodyId).Orbit.Body.Position;
         }
     }
 
