@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dpor6pl8n0wxj"]
 
-[ext_resource type="Script" uid="uid://cyn3hmmstdc83" path="res://world/celestial_body/CelestialBody.cs" id="1_mjyrs"]
+[ext_resource type="Script" uid="uid://dykxl0346mxig" path="res://world/celestial_body/CelestialBodyView.cs" id="1_y367p"]
 [ext_resource type="Material" uid="uid://6hov3l7h5tfj" path="res://world/celestial_body/soi.tres" id="2_y367p"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_y367p"]
@@ -8,7 +8,7 @@
 [sub_resource type="SphereMesh" id="SphereMesh_itcce"]
 
 [node name="CelestialBody" type="Node3D" unique_id=1447000563 node_paths=PackedStringArray("_mesh", "_soiMesh")]
-script = ExtResource("1_mjyrs")
+script = ExtResource("1_y367p")
 _mesh = NodePath("Mesh")
 _soiMesh = NodePath("SoiMesh")
 

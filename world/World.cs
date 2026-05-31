@@ -29,73 +29,85 @@ public partial class World : Node
 
     private readonly List<CelestialBody> _celestialBodies = new();
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
+    private readonly Dictionary<string, CelestialBodyView> _celestialBodyViewsById = new();
 
     public override void _Ready()
     {
-        var star = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        star.CelestialBodyId = "star";
-        star.Mass = 100;
-        star.Radius = 2;
-        star.SoiRadius = 100;
-        AddChild(star);
+        var star = new CelestialBody
+        {
+            CelestialBodyId = "star",
+            Mass = 100,
+            Radius = 2,
+            SoiRadius = 100,
+        };
         _celestialBodies.Add(star);
 
-        var planet1 = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        planet1.CelestialBodyId = "planet1";
-        planet1.Orbit = Orbit.FromElements(star, 10, 0.05, 0, 0, 0, 0);
-        planet1.Mass = 1;
-        planet1.Radius = 0.25;
+        var planet1 = new CelestialBody
+        {
+            CelestialBodyId = "planet1",
+            Orbit = Orbit.FromElements(star, 10, 0.05, 0, 0, 0, 0),
+            Mass = 1,
+            Radius = 0.25,
+        };
         planet1.SoiRadius = OrbitUtils.CalculateSoiRadius(planet1);
-        AddChild(planet1);
         _celestialBodies.Add(planet1);
 
-        var moon1 = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        moon1.CelestialBodyId = "moon1";
-        moon1.Orbit = Orbit.FromElements(planet1, 1, 0, 0, 0, 0, 0);
-        moon1.Mass = 0.05;
-        moon1.Radius = 0.05;
+        var moon1 = new CelestialBody
+        {
+            CelestialBodyId = "moon1",
+            Orbit = Orbit.FromElements(planet1, 1, 0, 0, 0, 0, 0),
+            Mass = 0.05,
+            Radius = 0.05,
+        };
         moon1.SoiRadius = OrbitUtils.CalculateSoiRadius(moon1);
-        AddChild(moon1);
         _celestialBodies.Add(moon1);
 
-        var planet2 = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        planet2.CelestialBodyId = "planet2";
-        planet2.Orbit = Orbit.FromElements(
-            star,
-            30,
-            0.2,
-            Mathf.DegToRad(3),
-            Mathf.DegToRad(90),
-            Mathf.DegToRad(45),
-            0
-        );
-        planet2.Mass = 1;
-        planet2.Radius = 0.5;
+        var planet2 = new CelestialBody
+        {
+            CelestialBodyId = "planet2",
+            Orbit = Orbit.FromElements(
+                star,
+                30,
+                0.2,
+                Mathf.DegToRad(3),
+                Mathf.DegToRad(90),
+                Mathf.DegToRad(45),
+                0
+            ),
+            Mass = 1,
+            Radius = 0.5,
+        };
         planet2.SoiRadius = OrbitUtils.CalculateSoiRadius(planet2);
-        AddChild(planet2);
         _celestialBodies.Add(planet2);
 
-        var moon2 = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        moon2.CelestialBodyId = "moon2";
-        moon2.Orbit = Orbit.FromElements(planet2, 1, 0, 0, 0, 0, 0);
-        moon2.Mass = 0.05;
-        moon2.Radius = 0.05;
+        var moon2 = new CelestialBody
+        {
+            CelestialBodyId = "moon2",
+            Orbit = Orbit.FromElements(planet2, 1, 0, 0, 0, 0, 0),
+            Mass = 0.05,
+            Radius = 0.05,
+        };
         moon2.SoiRadius = OrbitUtils.CalculateSoiRadius(moon2);
-        AddChild(moon2);
         _celestialBodies.Add(moon2);
 
-        var moon3 = _celestialBodyPrefab.Instantiate<CelestialBody>();
-        moon3.CelestialBodyId = "moon3";
-        moon3.Orbit = Orbit.FromElements(planet2, 3, 0.1, Mathf.DegToRad(-5), 0, 0, 0);
-        moon3.Mass = 0.05;
-        moon3.Radius = 0.05;
+        var moon3 = new CelestialBody
+        {
+            CelestialBodyId = "moon3",
+            Orbit = Orbit.FromElements(planet2, 3, 0.1, Mathf.DegToRad(-5), 0, 0, 0),
+            Mass = 0.05,
+            Radius = 0.05,
+        };
         moon3.SoiRadius = OrbitUtils.CalculateSoiRadius(moon3);
-        AddChild(moon3);
         _celestialBodies.Add(moon3);
 
         foreach (var celestialBody in _celestialBodies)
         {
             _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
+
+            var bodyView = _celestialBodyPrefab.Instantiate<CelestialBodyView>();
+            bodyView.Init(celestialBody);
+            AddChild(bodyView);
+            _celestialBodyViewsById.Add(celestialBody.CelestialBodyId, bodyView);
         }
 
         EmitSignalCelestialBodiesInitialized();
@@ -107,7 +119,9 @@ public partial class World : Node
         EmitSignalTimeWarpChange(_timeWarp);
 
         _mapFocusIndex = 0;
-        _camera.OnMapFocusChange(_celestialBodies[_mapFocusIndex]);
+        _camera.OnMapFocusChange(
+            _celestialBodyViewsById[_celestialBodies[_mapFocusIndex].CelestialBodyId]
+        );
     }
 
     public override void _PhysicsProcess(double delta)
@@ -127,6 +141,7 @@ public partial class World : Node
             var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
             var state = solver.SolveStateAtTime(_time);
             body.Position = (Vector3)(body.Orbit.Body.Position + state.Position);
+            _celestialBodyViewsById[body.CelestialBodyId].Position = (Vector3)body.Position;
         }
     }
 
@@ -169,7 +184,9 @@ public partial class World : Node
 
         if (mapFocusChanged)
         {
-            _camera.OnMapFocusChange(_celestialBodies[_mapFocusIndex]);
+            _camera.OnMapFocusChange(
+                _celestialBodyViewsById[_celestialBodies[_mapFocusIndex].CelestialBodyId]
+            );
         }
     }
 

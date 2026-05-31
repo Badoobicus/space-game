@@ -6,7 +6,7 @@ public partial class CameraController : Camera3D
     private Vector2 _rotation = new Vector2(0, 45);
     private float _zoom = 20;
     private Vector2 _lastMousePosition = Vector2.Zero;
-    private Node3D _focus;
+    private CelestialBodyView _focus;
 
     public override void _Process(double delta)
     {
@@ -40,8 +40,8 @@ public partial class CameraController : Camera3D
         _lastMousePosition = mousePosition;
     }
 
-    public void OnMapFocusChange(CelestialBody body)
+    public void OnMapFocusChange(CelestialBodyView focus)
     {
-        _focus = body;
+        _focus = focus;
     }
 }
