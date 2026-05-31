@@ -1,35 +1,27 @@
 using System;
-using System.Diagnostics;
-using Godot;
 
 public class ApproachSolver
 {
-    public static double SolveClosestApproach(Orbit subject, Orbit target, double time)
+    public static double SolveClosestApproach(
+        CelestialBody subject,
+        CelestialBody target,
+        double time
+    )
     {
-        var initialSubjectState = EllipticalOrbitSolver.SolveState(subject, time);
-        var initialTargetState = EllipticalOrbitSolver.SolveState(target, time);
-
-        var subjectSolver = OrbitSolver.FromInitialState(
-            initialSubjectState,
-            subject.Body.Mass,
-            time
-        );
-        var targetSolver = OrbitSolver.FromInitialState(initialTargetState, target.Body.Mass, time);
-
         double resultTime = -1;
         double resultDistanceSq = -1;
 
-        double subjectPeriod = subjectSolver.Period;
+        double subjectPeriod = subject.OrbitSolver.Period;
         int steps = 32;
         for (int i = 0; i < steps; i++)
         {
             double t = time + i * (subjectPeriod / steps);
 
-            var subjectState = subjectSolver.SolveStateAtTime(t);
+            var subjectState = subject.OrbitSolver.SolveStateAtTime(t);
             var subjectPosition = subjectState.Position;
             var subjectVelocity = subjectState.Velocity;
 
-            var targetState = targetSolver.SolveStateAtTime(t);
+            var targetState = target.OrbitSolver.SolveStateAtTime(t);
             var targetPosition = targetState.Position;
             var targetVelocity = targetState.Velocity;
 

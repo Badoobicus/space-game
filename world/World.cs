@@ -102,6 +102,16 @@ public partial class World : Node
 
         foreach (var celestialBody in _celestialBodies)
         {
+            if (celestialBody.Orbit != null)
+            {
+                var initialState = EllipticalOrbitSolver.SolveState(celestialBody.Orbit, 0);
+                celestialBody.OrbitSolver = OrbitSolver.FromInitialState(
+                    initialState,
+                    celestialBody.Orbit.Body.Mass,
+                    0
+                );
+            }
+
             _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
 
             var bodyView = _celestialBodyPrefab.Instantiate<CelestialBodyView>();
@@ -136,11 +146,10 @@ public partial class World : Node
                 continue;
             }
 
-            var orbit = body.Orbit;
-            var initialState = EllipticalOrbitSolver.SolveState(orbit, 0);
-            var solver = OrbitSolver.FromInitialState(initialState, orbit.Body.Mass, 0);
-            var state = solver.SolveStateAtTime(_time);
-            body.Position = (Vector3)(body.Orbit.Body.Position + state.Position);
+            var state = body.OrbitSolver.SolveStateAtTime(_time);
+            body.Position = body.Orbit.Body.Position + state.Position;
+            body.Velocity = state.Velocity;
+
             _celestialBodyViewsById[body.CelestialBodyId].Position = (Vector3)body.Position;
         }
     }
