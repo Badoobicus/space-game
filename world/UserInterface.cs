@@ -26,7 +26,7 @@ public partial class UserInterface : Node
         _fpsLabel.Text = $"FPS: {Engine.GetFramesPerSecond()}";
     }
 
-    private void _OnTimeChanged(double time)
+    private void _OnTimeChanged(long year, double time)
     {
         double secPerMinute = 60;
         double secPerHour = secPerMinute * 60;
@@ -34,7 +34,7 @@ public partial class UserInterface : Node
         double secPerYear = secPerDay * 365;
 
         double workingTime = time;
-        int years = (int)(workingTime / secPerYear);
+        long years = (int)(workingTime / secPerYear);
         workingTime -= years * secPerYear;
         int days = (int)(workingTime / secPerDay);
         workingTime -= days * secPerDay;
@@ -43,6 +43,8 @@ public partial class UserInterface : Node
         int minutes = (int)(workingTime / secPerMinute);
         workingTime -= minutes * secPerMinute;
         int seconds = (int)workingTime;
+
+        years += year;
 
         _timeLabel.Text = $"Year {years + 1}, Day {days + 1} {hours:D2}:{minutes:D2}:{seconds:D2}";
     }

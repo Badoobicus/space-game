@@ -3,9 +3,13 @@ using System;
 
 public class OrbitSolver
 {
+    public double Epoch => _t0;
     public double Period { get; }
     public double Periapsis { get; }
     public double Apoapsis { get; }
+
+    // s_0 - initial state vector
+    private readonly StateVector _s0;
 
     /// M - mass of main body
     private readonly double _M;
@@ -40,12 +44,13 @@ public class OrbitSolver
     /// t0 - epoch
     private readonly double _t0;
 
-    private OrbitSolver(StateVector stateVector, double mainBodyMass, double epoch)
+    private OrbitSolver(StateVector initialStateVector, double mainBodyMass, double epoch)
     {
+        _s0 = initialStateVector;
         _M = mainBodyMass;
-        _r0 = stateVector.Position;
+        _r0 = _s0.Position;
         _r0Mag = _r0.Length();
-        _v0 = stateVector.Velocity;
+        _v0 = _s0.Velocity;
         _v0MagSq = _v0.LengthSquared();
         _r0DotV0 = _r0.Dot(_v0);
         _mu = _M * Constants.GravitationalConstant;
@@ -70,6 +75,11 @@ public class OrbitSolver
             Periapsis = a * (1 - e);
             Apoapsis = -1;
         }
+    }
+
+    public OrbitSolver WithEpoch(double epoch)
+    {
+        return FromInitialState(_s0, _M, epoch);
     }
 
     public StateVector SolveStateAtTime(double time)

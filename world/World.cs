@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Godot;
 
 public partial class World : Node
@@ -17,11 +18,14 @@ public partial class World : Node
     public delegate void CelestialBodiesInitializedEventHandler();
 
     [Signal]
-    public delegate void TimeChangedEventHandler(double time);
+    public delegate void TimeChangedEventHandler(long year, double time);
 
     [Signal]
     public delegate void TimeWarpChangeEventHandler(double timeWarp);
 
+    private const long SecondsPerYear = 365 * 24 * 60 * 60;
+
+    private long _year;
     private double _time;
     private int _timeWarpStep;
     private double _timeWarp;
@@ -122,8 +126,9 @@ public partial class World : Node
 
         EmitSignalCelestialBodiesInitialized();
 
+        _year = 0;
         _time = 0;
-        EmitSignalTimeChanged(_time);
+        EmitSignalTimeChanged(_year, _time);
 
         _timeWarp = _CalculateTimeWarp(_timeWarpStep);
         EmitSignalTimeWarpChange(_timeWarp);
@@ -137,7 +142,11 @@ public partial class World : Node
     public override void _PhysicsProcess(double delta)
     {
         _time += delta * _timeWarp;
-        EmitSignalTimeChanged(_time);
+        if (_time > SecondsPerYear)
+        {
+            _ShiftEpoch();
+        }
+        EmitSignalTimeChanged(_year, _time);
 
         foreach (var body in _celestialBodies)
         {
@@ -212,6 +221,29 @@ public partial class World : Node
     public double GetTime()
     {
         return _time;
+    }
+
+    private void _ShiftEpoch()
+    {
+        var elapsedYears = (long)_time / SecondsPerYear;
+        var elapsedSeconds = elapsedYears * SecondsPerYear;
+
+        foreach (var body in _celestialBodies)
+        {
+            if (body.Orbit == null)
+            {
+                continue;
+            }
+
+            body.OrbitSolver = body.OrbitSolver.WithEpoch(
+                body.OrbitSolver.Epoch
+                    + (long)(elapsedSeconds / body.OrbitSolver.Period) * body.OrbitSolver.Period
+                    - elapsedSeconds
+            );
+        }
+
+        _year += elapsedYears;
+        _time -= elapsedSeconds;
     }
 
     private double _CalculateTimeWarp(int timeWarpStep)
