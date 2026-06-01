@@ -23,8 +23,7 @@ public struct Vector3d
     public readonly Vector3d Cross(Vector3d v) =>
         new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
 
-    public readonly double AngleTo(Vector3d to) =>
-        Math.Atan2(this.Cross(to).Length(), this.Dot(to));
+    public readonly double AngleTo(Vector3d to) => Math.Atan2(Cross(to).Length(), Dot(to));
 
     public static Vector3d operator +(Vector3d v1, Vector3d v2) =>
         new(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
@@ -43,4 +42,9 @@ public struct Vector3d
 
     public static explicit operator Vector3(Vector3d customVec) =>
         new((float)customVec.X, (float)customVec.Y, (float)customVec.Z);
+
+    public override readonly string ToString()
+    {
+        return $"({X}, {Y}, {Z})";
+    }
 }
