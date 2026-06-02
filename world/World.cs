@@ -225,8 +225,8 @@ public partial class World : Node
 
     private void _ShiftEpoch()
     {
-        var elapsedYears = (long)_time / SecondsPerYear;
-        var elapsedSeconds = elapsedYears * SecondsPerYear;
+        var shiftedYears = (long)_time / SecondsPerYear;
+        var shiftedSeconds = shiftedYears * SecondsPerYear;
 
         foreach (var body in _celestialBodies)
         {
@@ -236,14 +236,13 @@ public partial class World : Node
             }
 
             body.OrbitSolver = body.OrbitSolver.WithEpoch(
-                body.OrbitSolver.Epoch
-                    + (long)(elapsedSeconds / body.OrbitSolver.Period) * body.OrbitSolver.Period
-                    - elapsedSeconds
+                body.OrbitSolver.Period
+                    + (body.OrbitSolver.Epoch - shiftedSeconds) % body.OrbitSolver.Period
             );
         }
 
-        _year += elapsedYears;
-        _time -= elapsedSeconds;
+        _year += shiftedYears;
+        _time -= shiftedSeconds;
     }
 
     private double _CalculateTimeWarp(int timeWarpStep)
