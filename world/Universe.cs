@@ -13,12 +13,11 @@ public partial class Universe : Node
     [Signal]
     public delegate void TimeWarpChangeEventHandler(double timeWarp);
 
-    private const long SecondsPerYear = 365 * 24 * 60 * 60;
-
     private long _year;
     private double _time;
     private int _timeWarpStep;
     private double _timeWarp;
+    private double _targetWarpTime;
 
     private readonly List<CelestialBody> _celestialBodies = new();
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
@@ -119,11 +118,21 @@ public partial class Universe : Node
 
     public override void _PhysicsProcess(double delta)
     {
-        _time += delta * _timeWarp;
-        if (_time > SecondsPerYear)
+        if (_targetWarpTime > 0)
+        {
+            _time = _targetWarpTime;
+            _targetWarpTime = -1;
+        }
+        else
+        {
+            _time += delta * _timeWarp;
+        }
+
+        if (_time > Constants.SecondsPerYear)
         {
             _ShiftEpoch();
         }
+
         EmitSignalTimeChanged(_year, _time);
     }
 
@@ -169,10 +178,18 @@ public partial class Universe : Node
         return _time;
     }
 
+    public void SetTargetWarpTime(double targetWarpTime)
+    {
+        if (targetWarpTime > _time)
+        {
+            _targetWarpTime = targetWarpTime;
+        }
+    }
+
     private void _ShiftEpoch()
     {
-        var shiftedYears = (long)_time / SecondsPerYear;
-        var shiftedSeconds = shiftedYears * SecondsPerYear;
+        var shiftedYears = (long)_time / Constants.SecondsPerYear;
+        var shiftedSeconds = shiftedYears * Constants.SecondsPerYear;
 
         foreach (var body in _celestialBodies)
         {

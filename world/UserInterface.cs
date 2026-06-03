@@ -15,8 +15,13 @@ public partial class UserInterface : Node
     [Export]
     private Label _fpsLabel;
 
+    [Export]
+    private Button _warpToEpochShiftButton;
+
     public override void _Ready()
     {
+        _warpToEpochShiftButton.Pressed += _OnWarpToEpochShiftButtonPressed;
+
         _universe.TimeChanged += _OnTimeChanged;
         _universe.TimeWarpChange += _OnTimeWarpChanged;
     }
@@ -24,6 +29,11 @@ public partial class UserInterface : Node
     public override void _Process(double delta)
     {
         _fpsLabel.Text = $"FPS: {Engine.GetFramesPerSecond()}";
+    }
+
+    private void _OnWarpToEpochShiftButtonPressed()
+    {
+        _universe.SetTargetWarpTime(Constants.SecondsPerYear - 5);
     }
 
     private void _OnTimeChanged(long year, double time)

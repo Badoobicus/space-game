@@ -9,7 +9,7 @@
 
 [node name="Node" type="Node" unique_id=1351746466]
 
-[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_universe", "_timeLabel", "_timeWarpLabel", "_fpsLabel")]
+[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_universe", "_timeLabel", "_timeWarpLabel", "_fpsLabel", "_warpToEpochShiftButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,26 +18,40 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_mmdvd")
 _universe = NodePath("../Universe")
-_timeLabel = NodePath("VBoxContainer/TimeLabel")
-_timeWarpLabel = NodePath("VBoxContainer/TimeWarpLabel")
-_fpsLabel = NodePath("VBoxContainer/FpsLabel")
+_timeLabel = NodePath("VBoxContainer1/TimeLabel")
+_timeWarpLabel = NodePath("VBoxContainer1/TimeWarpLabel")
+_fpsLabel = NodePath("VBoxContainer1/FpsLabel")
+_warpToEpochShiftButton = NodePath("VBoxContainer2/WarpToEpochShiftButton")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UserInterface" unique_id=430396609]
-layout_mode = 0
+[node name="VBoxContainer1" type="VBoxContainer" parent="UserInterface" unique_id=430396609]
+layout_mode = 1
 offset_right = 94.0
 offset_bottom = 77.0
 
-[node name="TimeLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=600726830]
+[node name="TimeLabel" type="Label" parent="UserInterface/VBoxContainer1" unique_id=600726830]
 layout_mode = 2
 text = "[Time]"
 
-[node name="TimeWarpLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=830270914]
+[node name="TimeWarpLabel" type="Label" parent="UserInterface/VBoxContainer1" unique_id=830270914]
 layout_mode = 2
 text = "[Time Warp]"
 
-[node name="FpsLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=2003063576]
+[node name="FpsLabel" type="Label" parent="UserInterface/VBoxContainer1" unique_id=2003063576]
 layout_mode = 2
 text = "[FPS]"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="UserInterface" unique_id=668848143]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+
+[node name="WarpToEpochShiftButton" type="Button" parent="UserInterface/VBoxContainer2" unique_id=1672038465]
+layout_mode = 2
+text = "Warp To Epoch Shift"
 
 [node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_universe", "_camera")]
 layout_mode = 3
