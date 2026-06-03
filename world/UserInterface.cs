@@ -4,7 +4,7 @@ using System;
 public partial class UserInterface : Node
 {
     [Export]
-    private World _world;
+    private Universe _universe;
 
     [Export]
     private Label _timeLabel;
@@ -17,8 +17,8 @@ public partial class UserInterface : Node
 
     public override void _Ready()
     {
-        _world.TimeChanged += _OnTimeChanged;
-        _world.TimeWarpChange += _OnTimeWarpChanged;
+        _universe.TimeChanged += _OnTimeChanged;
+        _universe.TimeWarpChange += _OnTimeWarpChanged;
     }
 
     public override void _Process(double delta)

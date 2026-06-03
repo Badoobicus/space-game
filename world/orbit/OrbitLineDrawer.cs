@@ -4,7 +4,7 @@ using Godot;
 public partial class OrbitLineDrawer : Control
 {
     [Export]
-    private World _world;
+    private Universe _universe;
 
     [Export]
     private Camera3D _camera;
@@ -13,7 +13,7 @@ public partial class OrbitLineDrawer : Control
 
     public override void _Ready()
     {
-        _world.CelestialBodiesInitialized += _GenerateOrbitLineMeshes;
+        _universe.CelestialBodiesInitialized += _GenerateOrbitLineMeshes;
     }
 
     public override void _Process(double delta)
@@ -36,7 +36,7 @@ public partial class OrbitLineDrawer : Control
             AlbedoColor = Colors.Aqua,
         };
 
-        foreach (var body in _world.GetCelestialBodies())
+        foreach (var body in _universe.GetCelestialBodies())
         {
             if (body.Orbit == null)
             {
@@ -61,7 +61,7 @@ public partial class OrbitLineDrawer : Control
             immediateMesh.SurfaceEnd();
             meshInstance.Mesh = immediateMesh;
             meshInstance.MaterialOverride = material;
-            _world.AddChild(meshInstance);
+            _universe.AddChild(meshInstance);
 
             _orbitLineMeshesByCelestialBodyId.Add(body.CelestialBodyId, meshInstance);
         }
@@ -72,19 +72,19 @@ public partial class OrbitLineDrawer : Control
         foreach (var (celestialBodyId, meshInstance) in _orbitLineMeshesByCelestialBodyId)
         {
             meshInstance.Position = (Vector3)
-                _world.GetCelestialBody(celestialBodyId).Orbit.Body.Position;
+                _universe.GetCelestialBody(celestialBodyId).Orbit.Body.Position;
         }
     }
 
     private void _DrawClosestApproach()
     {
-        var body1 = _world.GetCelestialBody("planet1");
-        var body2 = _world.GetCelestialBody("planet2");
+        var body1 = _universe.GetCelestialBody("planet1");
+        var body2 = _universe.GetCelestialBody("planet2");
 
         var timeOfClosestApproach = ApproachSolver.SolveClosestApproach(
             body1,
             body2,
-            _world.GetTime()
+            _universe.GetTime()
         );
 
         if (timeOfClosestApproach < 0)
@@ -110,7 +110,7 @@ public partial class OrbitLineDrawer : Control
 
     private void _DrawVelocities()
     {
-        foreach (var body in _world.GetCelestialBodies())
+        foreach (var body in _universe.GetCelestialBodies())
         {
             if (body.Orbit == null)
             {

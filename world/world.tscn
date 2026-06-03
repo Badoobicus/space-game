@@ -1,15 +1,15 @@
 [gd_scene format=3 uid="uid://enrc83rbynbw"]
 
-[ext_resource type="Script" uid="uid://5knwcwjag01p" path="res://world/World.cs" id="1_6xmxd"]
 [ext_resource type="PackedScene" uid="uid://dpor6pl8n0wxj" path="res://world/celestial_body/celestial_body.tscn" id="2_tcf2h"]
 [ext_resource type="Script" uid="uid://0nr5q7wk65wl" path="res://world/orbit/OrbitLineDrawer.cs" id="3_4717r"]
+[ext_resource type="Script" uid="uid://5knwcwjag01p" path="res://world/Universe.cs" id="3_fn3g3"]
 [ext_resource type="Script" uid="uid://cedfnnuxugh3p" path="res://world/CameraController.cs" id="3_h5o24"]
-[ext_resource type="PackedScene" uid="uid://ch8kdy12qm6vf" path="res://world/vessel/vessel.tscn" id="5_fn3g3"]
 [ext_resource type="Script" uid="uid://buruu48totkwo" path="res://world/UserInterface.cs" id="5_mmdvd"]
+[ext_resource type="Script" uid="uid://cbpymc2sr83cp" path="res://world/UniverseView.cs" id="5_sc4t8"]
 
 [node name="Node" type="Node" unique_id=1351746466]
 
-[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_world", "_timeLabel", "_timeWarpLabel", "_fpsLabel")]
+[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_universe", "_timeLabel", "_timeWarpLabel", "_fpsLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,15 +17,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_mmdvd")
-_world = NodePath("../World")
+_universe = NodePath("../Universe")
 _timeLabel = NodePath("VBoxContainer/TimeLabel")
 _timeWarpLabel = NodePath("VBoxContainer/TimeWarpLabel")
 _fpsLabel = NodePath("VBoxContainer/FpsLabel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UserInterface" unique_id=430396609]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 94.0
+offset_bottom = 77.0
 
 [node name="TimeLabel" type="Label" parent="UserInterface/VBoxContainer" unique_id=600726830]
 layout_mode = 2
@@ -39,25 +39,28 @@ text = "[Time Warp]"
 layout_mode = 2
 text = "[FPS]"
 
-[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_world", "_camera")]
+[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_universe", "_camera")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("3_4717r")
-_world = NodePath("../World")
-_camera = NodePath("../World/Camera")
+_universe = NodePath("../Universe")
+_camera = NodePath("../Universe/UniverseView/Camera")
 
-[node name="World" type="Node3D" parent="." unique_id=2134618394 node_paths=PackedStringArray("_camera")]
+[node name="Universe" type="Node" parent="." unique_id=29592775]
 process_priority = -99
 process_physics_priority = -99
-script = ExtResource("1_6xmxd")
-_camera = NodePath("Camera")
-_celestialBodyPrefab = ExtResource("2_tcf2h")
-_vesselPrefab = ExtResource("5_fn3g3")
+script = ExtResource("3_fn3g3")
 
-[node name="Camera" type="Camera3D" parent="World" unique_id=1001467727]
+[node name="UniverseView" type="Node3D" parent="Universe" unique_id=1462696060 node_paths=PackedStringArray("_universe", "_camera")]
+script = ExtResource("5_sc4t8")
+_universe = NodePath("..")
+_camera = NodePath("Camera")
+_celestialBodyViewPrefab = ExtResource("2_tcf2h")
+
+[node name="Camera" type="Camera3D" parent="Universe/UniverseView" unique_id=1001467727]
 script = ExtResource("3_h5o24")
 
-[node name="DirectionalLight" type="DirectionalLight3D" parent="World" unique_id=2138039474]
-transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+[node name="DirectionalLight" type="DirectionalLight3D" parent="Universe/UniverseView" unique_id=2138039474]
+transform = Transform3D(0.7071068, -0.5, 0.5, 0, 0.7071068, 0.7071068, -0.7071068, -0.5, 0.5, 0, 0, 0)

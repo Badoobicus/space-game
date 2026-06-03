@@ -1,19 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Godot;
 
-public partial class World : Node
+public partial class Universe : Node
 {
-    [Export]
-    private CameraController _camera;
-
-    [Export]
-    private PackedScene _celestialBodyPrefab;
-
-    [Export]
-    private PackedScene _vesselPrefab;
-
     [Signal]
     public delegate void CelestialBodiesInitializedEventHandler();
 
@@ -29,11 +19,9 @@ public partial class World : Node
     private double _time;
     private int _timeWarpStep;
     private double _timeWarp;
-    private int _mapFocusIndex;
 
     private readonly List<CelestialBody> _celestialBodies = new();
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
-    private readonly Dictionary<string, CelestialBodyView> _celestialBodyViewsById = new();
 
     public override void _Ready()
     {
@@ -117,11 +105,6 @@ public partial class World : Node
             }
 
             _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
-
-            var bodyView = _celestialBodyPrefab.Instantiate<CelestialBodyView>();
-            bodyView.Init(celestialBody);
-            AddChild(bodyView);
-            _celestialBodyViewsById.Add(celestialBody.CelestialBodyId, bodyView);
         }
 
         EmitSignalCelestialBodiesInitialized();
@@ -132,11 +115,6 @@ public partial class World : Node
 
         _timeWarp = _CalculateTimeWarp(_timeWarpStep);
         EmitSignalTimeWarpChange(_timeWarp);
-
-        _mapFocusIndex = 0;
-        _camera.OnMapFocusChange(
-            _celestialBodyViewsById[_celestialBodies[_mapFocusIndex].CelestialBodyId]
-        );
     }
 
     public override void _PhysicsProcess(double delta)
@@ -147,26 +125,11 @@ public partial class World : Node
             _ShiftEpoch();
         }
         EmitSignalTimeChanged(_year, _time);
-
-        foreach (var body in _celestialBodies)
-        {
-            if (body.Orbit == null)
-            {
-                continue;
-            }
-
-            var state = body.OrbitSolver.SolveStateAtTime(_time);
-            body.Position = body.Orbit.Body.Position + state.Position;
-            body.Velocity = state.Velocity;
-
-            _celestialBodyViewsById[body.CelestialBodyId].Position = (Vector3)body.Position;
-        }
     }
 
     public override void _Input(InputEvent @event)
     {
         var timeWarpChanged = false;
-        var mapFocusChanged = false;
 
         if (@event.IsActionPressed("time_warp_increase"))
         {
@@ -183,28 +146,11 @@ public partial class World : Node
             _timeWarpStep = 0;
             timeWarpChanged = true;
         }
-        else if (@event.IsActionPressed("map_focus_next"))
-        {
-            _mapFocusIndex = (_mapFocusIndex + 1) % _celestialBodies.Count;
-            mapFocusChanged = true;
-        }
-        else if (@event.IsActionPressed("map_focus_prev"))
-        {
-            _mapFocusIndex = (_celestialBodies.Count + _mapFocusIndex - 1) % _celestialBodies.Count;
-            mapFocusChanged = true;
-        }
 
         if (timeWarpChanged)
         {
             _timeWarp = _CalculateTimeWarp(_timeWarpStep);
             EmitSignalTimeWarpChange(_timeWarp);
-        }
-
-        if (mapFocusChanged)
-        {
-            _camera.OnMapFocusChange(
-                _celestialBodyViewsById[_celestialBodies[_mapFocusIndex].CelestialBodyId]
-            );
         }
     }
 

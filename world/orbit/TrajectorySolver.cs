@@ -4,7 +4,7 @@ using System;
 public class TrajectorySolver
 {
     public static Trajectory SolveTrajectory(
-        World world,
+        Universe universe,
         CelestialBody body,
         Vector3 position,
         Vector3 direction
