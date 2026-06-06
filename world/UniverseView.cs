@@ -12,13 +12,17 @@ public partial class UniverseView : Node3D
     [Export]
     private PackedScene _celestialBodyViewPrefab;
 
+    [Export]
+    private PackedScene _vesselsPrefab;
+
     private int _mapFocusIndex;
 
     private readonly Dictionary<string, CelestialBodyView> _celestialBodyViewsById = new();
+    private readonly Dictionary<string, VesselView> _vesselViewsById = new();
 
     public override void _Ready()
     {
-        _universe.CelestialBodiesInitialized += _OnCelestialBodiesInitialized;
+        _universe.UniverseInitialized += _OnUniverseInitialized;
         _universe.TimeChanged += _OnTimeChanged;
     }
 
@@ -47,7 +51,7 @@ public partial class UniverseView : Node3D
         }
     }
 
-    private void _OnCelestialBodiesInitialized()
+    private void _OnUniverseInitialized()
     {
         var celestialBodies = _universe.GetCelestialBodies();
 
@@ -59,6 +63,16 @@ public partial class UniverseView : Node3D
             _celestialBodyViewsById.Add(celestialBody.CelestialBodyId, celestialBodyView);
         }
 
+        var vessels = _universe.GetVessels();
+
+        foreach (var vessel in vessels)
+        {
+            var vesselView = _vesselsPrefab.Instantiate<VesselView>();
+            vesselView.Scale = Vector3.One * 0.03f;
+            AddChild(vesselView);
+            _vesselViewsById.Add(vessel.VesselId, vesselView);
+        }
+
         _mapFocusIndex = 0;
         _camera.OnMapFocusChange(
             _celestialBodyViewsById[celestialBodies[_mapFocusIndex].CelestialBodyId]
@@ -67,20 +81,17 @@ public partial class UniverseView : Node3D
 
     private void _OnTimeChanged(long year, double time)
     {
-        var celestialBodies = _universe.GetCelestialBodies();
-
-        foreach (var body in celestialBodies)
+        foreach (var (id, bodyView) in _celestialBodyViewsById)
         {
-            if (body.Orbit == null)
-            {
-                continue;
-            }
+            var body = _universe.GetCelestialBody(id);
+            bodyView.Position = (Vector3)body.Position;
+        }
 
-            var state = body.OrbitSolver.SolveStateAtTime(time);
-            body.Position = body.Orbit.Body.Position + state.Position;
-            body.Velocity = state.Velocity;
-
-            _celestialBodyViewsById[body.CelestialBodyId].Position = (Vector3)body.Position;
+        foreach (var (id, vesselView) in _vesselViewsById)
+        {
+            var vessel = _universe.GetVessel(id);
+            vesselView.Position = (Vector3)vessel.Position;
+            vesselView.LookAt((Vector3)(vessel.Position + vessel.Velocity), Vector3.Up);
         }
     }
 }

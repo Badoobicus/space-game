@@ -1,4 +1,4 @@
-public class CelestialBody
+public class CelestialBody : IOrbitable
 {
     public string CelestialBodyId { get; set; }
     public double Mass { get; set; }

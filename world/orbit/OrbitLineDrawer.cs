@@ -13,7 +13,7 @@ public partial class OrbitLineDrawer : Control
 
     public override void _Ready()
     {
-        _universe.CelestialBodiesInitialized += _GenerateOrbitLineMeshes;
+        _universe.UniverseInitialized += _GenerateOrbitLineMeshes;
     }
 
     public override void _Process(double delta)
@@ -54,7 +54,7 @@ public partial class OrbitLineDrawer : Control
             {
                 double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
                 var state = body.OrbitSolver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
-                var pos = (Vector3)(body.Orbit.Body.Position + state.Position);
+                var pos = (Vector3)state.Position;
                 immediateMesh.SurfaceAddVertex(pos);
             }
 

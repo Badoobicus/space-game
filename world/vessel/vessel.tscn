@@ -1,19 +1,22 @@
 [gd_scene format=3 uid="uid://ch8kdy12qm6vf"]
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_nnwkg"]
+[ext_resource type="Script" uid="uid://b1rge2kj3va2x" path="res://world/vessel/VesselView.cs" id="1_m78xo"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_6v3bh"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_m78xo"]
 
 [node name="Vessel" type="Node3D" unique_id=1595206790]
+script = ExtResource("1_m78xo")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=636282966]
-transform = Transform3D(0.5, 0, 0, 0, -1.0927847e-08, -0.5, 0, 0.25, -2.1855694e-08, 0, 0, -0.75)
-mesh = SubResource("CylinderMesh_nnwkg")
+transform = Transform3D(0.75, 0, 0, 0, -3.278354e-08, -0.75, 0, 0.75, -3.278354e-08, 0, 0, -0.5)
+mesh = SubResource("SphereMesh_6v3bh")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=77363612]
 transform = Transform3D(1, 0, 0, 0, -2.1855694e-08, -1, 0, 0.5, -4.371139e-08, 0, 0, 0)
 mesh = SubResource("CylinderMesh_m78xo")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=38513982]
-transform = Transform3D(0.9, 0, 0, 0, -1.0927847e-08, -0.9, 0, 0.25, -3.934025e-08, 0, 0, 0.75)
+transform = Transform3D(0.7, 0, 0, 0, -1.0927847e-08, -0.7, 0, 0.25, -3.059797e-08, 0, 0, 0.75)
 mesh = SubResource("CylinderMesh_m78xo")

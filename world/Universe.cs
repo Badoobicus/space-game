@@ -5,7 +5,7 @@ using Godot;
 public partial class Universe : Node
 {
     [Signal]
-    public delegate void CelestialBodiesInitializedEventHandler();
+    public delegate void UniverseInitializedEventHandler();
 
     [Signal]
     public delegate void TimeChangedEventHandler(long year, double time);
@@ -19,11 +19,16 @@ public partial class Universe : Node
     private double _timeWarp;
     private double _targetWarpTime;
 
+    private readonly List<IOrbitable> _orbitables = new();
     private readonly List<CelestialBody> _celestialBodies = new();
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
+    private readonly Dictionary<string, Vessel> _vesselsById = new();
 
     public override void _Ready()
     {
+        List<CelestialBody> celestialBodies = new();
+        List<Vessel> vessels = new();
+
         var star = new CelestialBody
         {
             CelestialBodyId = "star",
@@ -31,7 +36,7 @@ public partial class Universe : Node
             Radius = 2,
             SoiRadius = 100,
         };
-        _celestialBodies.Add(star);
+        celestialBodies.Add(star);
 
         var planet1 = new CelestialBody
         {
@@ -41,7 +46,7 @@ public partial class Universe : Node
             Radius = 0.25,
         };
         planet1.SoiRadius = OrbitUtils.CalculateSoiRadius(planet1);
-        _celestialBodies.Add(planet1);
+        celestialBodies.Add(planet1);
 
         var moon1 = new CelestialBody
         {
@@ -51,7 +56,7 @@ public partial class Universe : Node
             Radius = 0.05,
         };
         moon1.SoiRadius = OrbitUtils.CalculateSoiRadius(moon1);
-        _celestialBodies.Add(moon1);
+        celestialBodies.Add(moon1);
 
         var planet2 = new CelestialBody
         {
@@ -69,7 +74,7 @@ public partial class Universe : Node
             Radius = 0.5,
         };
         planet2.SoiRadius = OrbitUtils.CalculateSoiRadius(planet2);
-        _celestialBodies.Add(planet2);
+        celestialBodies.Add(planet2);
 
         var moon2 = new CelestialBody
         {
@@ -79,7 +84,7 @@ public partial class Universe : Node
             Radius = 0.05,
         };
         moon2.SoiRadius = OrbitUtils.CalculateSoiRadius(moon2);
-        _celestialBodies.Add(moon2);
+        celestialBodies.Add(moon2);
 
         var moon3 = new CelestialBody
         {
@@ -89,24 +94,47 @@ public partial class Universe : Node
             Radius = 0.05,
         };
         moon3.SoiRadius = OrbitUtils.CalculateSoiRadius(moon3);
-        _celestialBodies.Add(moon3);
+        celestialBodies.Add(moon3);
 
-        foreach (var celestialBody in _celestialBodies)
+        var vessel1 = new Vessel
         {
-            if (celestialBody.Orbit != null)
-            {
-                var initialState = EllipticalOrbitSolver.SolveState(celestialBody.Orbit, 0);
-                celestialBody.OrbitSolver = OrbitSolver.FromInitialState(
-                    initialState,
-                    celestialBody.Orbit.Body.Mass,
-                    0
-                );
-            }
+            VesselId = "vessel1",
+            Orbit = Orbit.FromElements(planet1, 0.5, 0, 0, 0, 0, 0),
+        };
+        vessels.Add(vessel1);
 
+        _celestialBodies.AddRange(celestialBodies);
+
+        foreach (var celestialBody in celestialBodies)
+        {
             _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
+            _orbitables.Add(celestialBody);
         }
 
-        EmitSignalCelestialBodiesInitialized();
+        foreach (var vessel in vessels)
+        {
+            _vesselsById.Add(vessel.VesselId, vessel);
+            _orbitables.Add(vessel);
+        }
+
+        foreach (var orbitable in _orbitables)
+        {
+            if (orbitable.Orbit == null)
+            {
+                continue;
+            }
+
+            var initialState = EllipticalOrbitSolver.SolveState(orbitable.Orbit, 0);
+            orbitable.OrbitSolver = OrbitSolver.FromInitialState(
+                initialState,
+                orbitable.Orbit.Body.Mass,
+                0
+            );
+        }
+
+        _SimulateOrbitables();
+
+        EmitSignalUniverseInitialized();
 
         _year = 0;
         _time = 0;
@@ -132,6 +160,8 @@ public partial class Universe : Node
         {
             _ShiftEpoch();
         }
+
+        _SimulateOrbitables();
 
         EmitSignalTimeChanged(_year, _time);
     }
@@ -170,7 +200,17 @@ public partial class Universe : Node
 
     public List<CelestialBody> GetCelestialBodies()
     {
-        return _celestialBodies;
+        return new(_celestialBodiesById.Values);
+    }
+
+    public Vessel GetVessel(string vesselId)
+    {
+        return _vesselsById.GetValueOrDefault(vesselId, null);
+    }
+
+    public List<Vessel> GetVessels()
+    {
+        return new(_vesselsById.Values);
     }
 
     public double GetTime()
@@ -183,6 +223,21 @@ public partial class Universe : Node
         if (targetWarpTime > _time)
         {
             _targetWarpTime = targetWarpTime;
+        }
+    }
+
+    private void _SimulateOrbitables()
+    {
+        foreach (var orbitable in _orbitables)
+        {
+            if (orbitable.Orbit == null)
+            {
+                continue;
+            }
+
+            var state = orbitable.OrbitSolver.SolveStateAtTime(_time);
+            orbitable.Position = orbitable.Orbit.Body.Position + state.Position;
+            orbitable.Velocity = state.Velocity;
         }
     }
 
