@@ -246,16 +246,16 @@ public partial class Universe : Node
         var shiftedYears = (long)_time / Constants.SecondsPerYear;
         var shiftedSeconds = shiftedYears * Constants.SecondsPerYear;
 
-        foreach (var body in _celestialBodies)
+        foreach (var orbitable in _orbitables)
         {
-            if (body.Orbit == null)
+            if (orbitable.Orbit == null)
             {
                 continue;
             }
 
-            body.OrbitSolver = body.OrbitSolver.WithEpoch(
-                body.OrbitSolver.Period
-                    + (body.OrbitSolver.Epoch - shiftedSeconds) % body.OrbitSolver.Period
+            orbitable.OrbitSolver = orbitable.OrbitSolver.WithEpoch(
+                orbitable.OrbitSolver.Period
+                    + (orbitable.OrbitSolver.Epoch - shiftedSeconds) % orbitable.OrbitSolver.Period
             );
         }
 
