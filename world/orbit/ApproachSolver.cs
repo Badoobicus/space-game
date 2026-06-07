@@ -11,17 +11,17 @@ public class ApproachSolver
         double resultTime = -1;
         double resultDistanceSq = -1;
 
-        double subjectPeriod = subject.OrbitSolver.Period;
+        double subjectPeriod = subject.Orbit.Period;
         int steps = 32;
         for (int i = 0; i < steps; i++)
         {
             double t = time + i * (subjectPeriod / steps);
 
-            var subjectState = subject.OrbitSolver.SolveStateAtTime(t);
+            var subjectState = subject.Orbit.SolveStateAtTime(t);
             var subjectPosition = subjectState.Position;
             var subjectVelocity = subjectState.Velocity;
 
-            var targetState = target.OrbitSolver.SolveStateAtTime(t);
+            var targetState = target.Orbit.SolveStateAtTime(t);
             var targetPosition = targetState.Position;
             var targetVelocity = targetState.Velocity;
 

@@ -41,7 +41,19 @@ public partial class Universe : Node
         var planet1 = new CelestialBody
         {
             CelestialBodyId = "planet1",
-            Orbit = Orbit.FromElements(star, 10, 0.05, 0, 0, 0, 0),
+            Orbit = Orbit.FromElements(
+                new EllipticalOrbitElements
+                {
+                    CenterBody = star,
+                    SemiMajorAxis = 10,
+                    Eccentricity = 0.05,
+                    Inclination = 0,
+                    LongitudeOfAscendingNode = 0,
+                    ArgumentOfPeriapsis = 0,
+                    MeanAnomalyAtEpoch = 0
+                },
+                0
+            ),
             Mass = 1,
             Radius = 0.25,
         };
@@ -51,7 +63,19 @@ public partial class Universe : Node
         var moon1 = new CelestialBody
         {
             CelestialBodyId = "moon1",
-            Orbit = Orbit.FromElements(planet1, 1, 0, 0, 0, 0, 0),
+            Orbit = Orbit.FromElements(
+                new EllipticalOrbitElements
+                {
+                    CenterBody = planet1,
+                    SemiMajorAxis = 1,
+                    Eccentricity = 0,
+                    Inclination = 0,
+                    LongitudeOfAscendingNode = 0,
+                    ArgumentOfPeriapsis = 0,
+                    MeanAnomalyAtEpoch = 0
+                },
+                0
+            ),
             Mass = 0.05,
             Radius = 0.05,
         };
@@ -62,12 +86,16 @@ public partial class Universe : Node
         {
             CelestialBodyId = "planet2",
             Orbit = Orbit.FromElements(
-                star,
-                30,
-                0.2,
-                Mathf.DegToRad(3),
-                Mathf.DegToRad(90),
-                Mathf.DegToRad(45),
+                new EllipticalOrbitElements
+                {
+                    CenterBody = star,
+                    SemiMajorAxis = 30,
+                    Eccentricity = 0.2,
+                    Inclination = Mathf.DegToRad(3),
+                    LongitudeOfAscendingNode = Mathf.DegToRad(90),
+                    ArgumentOfPeriapsis = Mathf.DegToRad(45),
+                    MeanAnomalyAtEpoch = 0
+                },
                 0
             ),
             Mass = 1,
@@ -79,7 +107,19 @@ public partial class Universe : Node
         var moon2 = new CelestialBody
         {
             CelestialBodyId = "moon2",
-            Orbit = Orbit.FromElements(planet2, 1, 0, 0, 0, 0, 0),
+            Orbit = Orbit.FromElements(
+                new EllipticalOrbitElements
+                {
+                    CenterBody = planet2,
+                    SemiMajorAxis = 1,
+                    Eccentricity = 0,
+                    Inclination = 0,
+                    LongitudeOfAscendingNode = 0,
+                    ArgumentOfPeriapsis = 0,
+                    MeanAnomalyAtEpoch = 0
+                },
+                0
+            ),
             Mass = 0.05,
             Radius = 0.05,
         };
@@ -89,7 +129,19 @@ public partial class Universe : Node
         var moon3 = new CelestialBody
         {
             CelestialBodyId = "moon3",
-            Orbit = Orbit.FromElements(planet2, 3, 0.1, Mathf.DegToRad(-5), 0, 0, 0),
+            Orbit = Orbit.FromElements(
+                new EllipticalOrbitElements
+                {
+                    CenterBody = planet2,
+                    SemiMajorAxis = 3,
+                    Eccentricity = 0.1,
+                    Inclination = Mathf.DegToRad(-5),
+                    LongitudeOfAscendingNode = 0,
+                    ArgumentOfPeriapsis = 0,
+                    MeanAnomalyAtEpoch = 0
+                },
+                0
+            ),
             Mass = 0.05,
             Radius = 0.05,
         };
@@ -99,7 +151,19 @@ public partial class Universe : Node
         var vessel1 = new Vessel
         {
             VesselId = "vessel1",
-            Orbit = Orbit.FromElements(planet1, 0.5, 0, 0, 0, 0, 0),
+            Orbit = Orbit.FromElements(
+                new EllipticalOrbitElements
+                {
+                    CenterBody = planet2,
+                    SemiMajorAxis = 0.5,
+                    Eccentricity = 0,
+                    Inclination = 0,
+                    LongitudeOfAscendingNode = 0,
+                    ArgumentOfPeriapsis = 0,
+                    MeanAnomalyAtEpoch = 0
+                },
+                0
+            ),
         };
         vessels.Add(vessel1);
 
@@ -115,21 +179,6 @@ public partial class Universe : Node
         {
             _vesselsById.Add(vessel.VesselId, vessel);
             _orbitables.Add(vessel);
-        }
-
-        foreach (var orbitable in _orbitables)
-        {
-            if (orbitable.Orbit == null)
-            {
-                continue;
-            }
-
-            var initialState = EllipticalOrbitSolver.SolveState(orbitable.Orbit, 0);
-            orbitable.OrbitSolver = OrbitSolver.FromInitialState(
-                initialState,
-                orbitable.Orbit.CenterBody.Mass,
-                0
-            );
         }
 
         _SimulateOrbitables();
@@ -235,7 +284,7 @@ public partial class Universe : Node
                 continue;
             }
 
-            var state = orbitable.OrbitSolver.SolveStateAtTime(_time);
+            var state = orbitable.Orbit.SolveStateAtTime(_time);
             orbitable.Position = state.Position;
             orbitable.Velocity = state.Velocity;
         }
@@ -253,9 +302,9 @@ public partial class Universe : Node
                 continue;
             }
 
-            orbitable.OrbitSolver = orbitable.OrbitSolver.WithEpoch(
-                orbitable.OrbitSolver.Period
-                    + (orbitable.OrbitSolver.Epoch - shiftedSeconds) % orbitable.OrbitSolver.Period
+            orbitable.Orbit = orbitable.Orbit.WithEpoch(
+                orbitable.Orbit.Period
+                    + (orbitable.Orbit.Epoch - shiftedSeconds) % orbitable.Orbit.Period
             );
         }
 

@@ -53,7 +53,7 @@ public partial class OrbitLineDrawer : Control
             for (int i = 0; i <= resolution; i++)
             {
                 double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
-                var state = body.OrbitSolver.SolveStateAtEccentricAnomaly(eccentricAnomaly);
+                var state = body.Orbit.SolveStateAtEccentricAnomaly(eccentricAnomaly);
                 var pos = (Vector3)state.Position;
                 immediateMesh.SurfaceAddVertex(pos);
             }
@@ -93,9 +93,9 @@ public partial class OrbitLineDrawer : Control
             return;
         }
 
-        var state1 = body1.OrbitSolver.SolveStateAtTime(timeOfClosestApproach);
+        var state1 = body1.Orbit.SolveStateAtTime(timeOfClosestApproach);
         Vector3 pos1 = (Vector3)state1.Position;
-        var state2 = body2.OrbitSolver.SolveStateAtTime(timeOfClosestApproach);
+        var state2 = body2.Orbit.SolveStateAtTime(timeOfClosestApproach);
         Vector3 pos2 = (Vector3)state2.Position;
 
         if (!_camera.IsPositionBehind(pos1))

@@ -11,12 +11,12 @@ public class EllipticalOrbitSolver
 
     private const double TwoPi = Math.PI * 2;
 
-    public static StateVector SolveState(Orbit orbit, double time)
+    public static StateVector SolveState(EllipticalOrbitElements elements, double time)
     {
-        double a = orbit.SemiMajorAxis;
-        double e = orbit.Eccentricity;
-        double M0 = orbit.MeanAnomalyAtEpoch;
-        double u = orbit.CenterBody.Mass * Constants.GravitationalConstant;
+        double a = elements.SemiMajorAxis;
+        double e = elements.Eccentricity;
+        double M0 = elements.MeanAnomalyAtEpoch;
+        double u = elements.CenterBody.Mass * Constants.GravitationalConstant;
 
         double dt = time;
         double M = WrapAngle(M0 + dt * (1 / a) * Math.Sqrt(u / a));
@@ -37,10 +37,13 @@ public class EllipticalOrbitSolver
         double v =
             2 * Math.Atan2(Math.Sqrt(1 + e) * Math.Sin(E / 2), Math.Sqrt(1 - e) * Math.Cos(E / 2));
 
-        return SolveStateFromAnomalies(orbit, E, v);
+        return SolveStateFromAnomalies(elements, E, v);
     }
 
-    public static StateVector SolveStateFromTrueAnomaly(Orbit orbit, double trueAnomaly)
+    public static StateVector SolveStateFromTrueAnomaly(
+        EllipticalOrbitElements orbit,
+        double trueAnomaly
+    )
     {
         double e = orbit.Eccentricity;
         double v = WrapAngle(trueAnomaly);
@@ -52,7 +55,7 @@ public class EllipticalOrbitSolver
     }
 
     private static StateVector SolveStateFromAnomalies(
-        Orbit orbit,
+        EllipticalOrbitElements orbit,
         double eccentricAnomaly,
         double trueAnomaly
     )
@@ -83,7 +86,7 @@ public class EllipticalOrbitSolver
         return ((radians % TwoPi) + TwoPi) % TwoPi;
     }
 
-    private static Vector3d OrbitalToInertial(double x, double y, Orbit orbit)
+    private static Vector3d OrbitalToInertial(double x, double y, EllipticalOrbitElements orbit)
     {
         double lan = orbit.LongitudeOfAscendingNode;
         double inc = orbit.Inclination;
