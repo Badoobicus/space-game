@@ -91,7 +91,7 @@ public partial class UniverseView : Node3D
         {
             var vessel = _universe.GetVessel(id);
             vesselView.Position = (Vector3)OrbitUtils.CalculateAbsolutePosition(vessel);
-            vesselView.LookAt((Vector3)(vessel.Position + vessel.Velocity), Vector3.Up);
+            vesselView.LookAt(vesselView.Position + (Vector3)vessel.Velocity, Vector3.Up);
         }
     }
 }
