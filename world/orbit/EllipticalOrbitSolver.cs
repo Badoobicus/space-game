@@ -16,7 +16,7 @@ public class EllipticalOrbitSolver
         double a = orbit.SemiMajorAxis;
         double e = orbit.Eccentricity;
         double M0 = orbit.MeanAnomalyAtEpoch;
-        double u = orbit.Body.Mass * Constants.GravitationalConstant;
+        double u = orbit.CenterBody.Mass * Constants.GravitationalConstant;
 
         double dt = time;
         double M = WrapAngle(M0 + dt * (1 / a) * Math.Sqrt(u / a));
@@ -59,7 +59,7 @@ public class EllipticalOrbitSolver
     {
         double a = orbit.SemiMajorAxis;
         double e = orbit.Eccentricity;
-        double u = orbit.Body.Mass * Constants.GravitationalConstant;
+        double u = orbit.CenterBody.Mass * Constants.GravitationalConstant;
         double E = eccentricAnomaly;
         double v = trueAnomaly;
 

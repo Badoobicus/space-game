@@ -127,7 +127,7 @@ public partial class Universe : Node
             var initialState = EllipticalOrbitSolver.SolveState(orbitable.Orbit, 0);
             orbitable.OrbitSolver = OrbitSolver.FromInitialState(
                 initialState,
-                orbitable.Orbit.Body.Mass,
+                orbitable.Orbit.CenterBody.Mass,
                 0
             );
         }

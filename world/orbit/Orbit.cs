@@ -1,6 +1,6 @@
 public class Orbit
 {
-    public readonly CelestialBody Body;
+    public readonly CelestialBody CenterBody;
     public readonly double SemiMajorAxis;
     public readonly double Eccentricity;
     public readonly double Inclination;
@@ -9,7 +9,7 @@ public class Orbit
     public readonly double MeanAnomalyAtEpoch;
 
     private Orbit(
-        CelestialBody body,
+        CelestialBody centerBody,
         double semiMajorAxis,
         double eccentricity,
         double inclination,
@@ -18,7 +18,7 @@ public class Orbit
         double meanAnomalyAtEpoch
     )
     {
-        Body = body;
+        CenterBody = centerBody;
         SemiMajorAxis = semiMajorAxis;
         Eccentricity = eccentricity;
         Inclination = inclination;

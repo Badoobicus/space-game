@@ -72,7 +72,8 @@ public partial class OrbitLineDrawer : Control
         foreach (var (celestialBodyId, meshInstance) in _orbitLineMeshesByCelestialBodyId)
         {
             var body = _universe.GetCelestialBody(celestialBodyId);
-            meshInstance.Position = (Vector3)OrbitUtils.CalculateAbsolutePosition(body.Orbit.Body);
+            meshInstance.Position = (Vector3)
+                OrbitUtils.CalculateAbsolutePosition(body.Orbit.CenterBody);
         }
     }
 
