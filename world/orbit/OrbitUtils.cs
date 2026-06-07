@@ -40,4 +40,18 @@ public class OrbitUtils
 
         return semiMajorAxis * Math.Pow(mass / parentMass, 0.4);
     }
+
+    public static Vector3d CalculateAbsolutePosition(IOrbitable orbitable)
+    {
+        var result = Vector3d.Zero;
+        var current = orbitable;
+
+        while (current != null)
+        {
+            result += current.Position;
+            current = current.Orbit?.Body;
+        }
+
+        return result;
+    }
 }

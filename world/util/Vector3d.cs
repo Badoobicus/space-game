@@ -3,6 +3,8 @@ using Godot;
 
 public struct Vector3d
 {
+    public static Vector3d Zero => new(0, 0, 0);
+
     public double X;
     public double Y;
     public double Z;

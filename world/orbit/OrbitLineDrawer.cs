@@ -71,8 +71,8 @@ public partial class OrbitLineDrawer : Control
     {
         foreach (var (celestialBodyId, meshInstance) in _orbitLineMeshesByCelestialBodyId)
         {
-            meshInstance.Position = (Vector3)
-                _universe.GetCelestialBody(celestialBodyId).Orbit.Body.Position;
+            var body = _universe.GetCelestialBody(celestialBodyId);
+            meshInstance.Position = (Vector3)OrbitUtils.CalculateAbsolutePosition(body.Orbit.Body);
         }
     }
 
@@ -118,7 +118,7 @@ public partial class OrbitLineDrawer : Control
             }
 
             var velocity = (Vector3)body.Velocity;
-            var from = (Vector3)body.Position;
+            var from = (Vector3)OrbitUtils.CalculateAbsolutePosition(body);
             var to = from + velocity;
 
             if (!_camera.IsPositionBehind(to) && !_camera.IsPositionBehind(from))

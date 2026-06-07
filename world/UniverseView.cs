@@ -84,13 +84,13 @@ public partial class UniverseView : Node3D
         foreach (var (id, bodyView) in _celestialBodyViewsById)
         {
             var body = _universe.GetCelestialBody(id);
-            bodyView.Position = (Vector3)body.Position;
+            bodyView.Position = (Vector3)OrbitUtils.CalculateAbsolutePosition(body);
         }
 
         foreach (var (id, vesselView) in _vesselViewsById)
         {
             var vessel = _universe.GetVessel(id);
-            vesselView.Position = (Vector3)vessel.Position;
+            vesselView.Position = (Vector3)OrbitUtils.CalculateAbsolutePosition(vessel);
             vesselView.LookAt((Vector3)(vessel.Position + vessel.Velocity), Vector3.Up);
         }
     }

@@ -236,7 +236,7 @@ public partial class Universe : Node
             }
 
             var state = orbitable.OrbitSolver.SolveStateAtTime(_time);
-            orbitable.Position = orbitable.Orbit.Body.Position + state.Position;
+            orbitable.Position = state.Position;
             orbitable.Velocity = state.Velocity;
         }
     }
