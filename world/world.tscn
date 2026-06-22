@@ -54,13 +54,14 @@ grow_horizontal = 0
 layout_mode = 2
 text = "Warp To Epoch Shift"
 
-[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_universe", "_camera")]
+[node name="OrbitLineDrawer" type="Control" parent="." unique_id=2019058039 node_paths=PackedStringArray("_universe", "_universeView", "_camera")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("3_4717r")
 _universe = NodePath("../Universe")
+_universeView = NodePath("../Universe/UniverseView")
 _camera = NodePath("../Universe/UniverseView/Camera")
 
 [node name="Universe" type="Node" parent="." unique_id=29592775]

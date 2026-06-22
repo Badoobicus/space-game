@@ -59,6 +59,8 @@ public partial class UniverseView : Node3D
         {
             var celestialBodyView = _celestialBodyViewPrefab.Instantiate<CelestialBodyView>();
             celestialBodyView.Init(celestialBody);
+            celestialBodyView.Name =
+                $"{celestialBody.CelestialBodyId}_{celestialBodyView.GetType().Name}";
             AddChild(celestialBodyView);
             _celestialBodyViewsById.Add(celestialBody.CelestialBodyId, celestialBodyView);
         }
@@ -69,6 +71,7 @@ public partial class UniverseView : Node3D
         {
             var vesselView = _vesselsPrefab.Instantiate<VesselView>();
             vesselView.Scale = Vector3.One * 0.03f;
+            vesselView.Name = $"{vessel.VesselId}_{vesselView.GetType().Name}";
             AddChild(vesselView);
             _vesselViewsById.Add(vessel.VesselId, vesselView);
         }

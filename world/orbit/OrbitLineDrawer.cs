@@ -7,6 +7,9 @@ public partial class OrbitLineDrawer : Control
     private Universe _universe;
 
     [Export]
+    private UniverseView _universeView;
+
+    [Export]
     private Camera3D _camera;
 
     private Dictionary<string, MeshInstance3D> _orbitLineMeshesByCelestialBodyId = new();
@@ -54,7 +57,9 @@ public partial class OrbitLineDrawer : Control
             }
 
             var meshInstance = _GenerateEllipticalOrbitLineMesh(body.Orbit, _orbitLineMaterial);
-            AddChild(meshInstance);
+            meshInstance.Name = $"{body.CelestialBodyId}_{meshInstance.GetType().Name}";
+            _universeView.AddChild(meshInstance);
+
             _orbitLineMeshesByCelestialBodyId.Add(body.CelestialBodyId, meshInstance);
         }
     }
@@ -88,8 +93,11 @@ public partial class OrbitLineDrawer : Control
                 if (!patchLineMeshesByPatch.ContainsKey(vesselPatch))
                 {
                     MeshInstance3D meshInstance = _GeneratePatchLineMesh(vesselPatch);
+                    meshInstance.Name =
+                        $"{vessel.VesselId}_{meshInstance.GetType().Name}_{meshInstance.GetInstanceId()}";
+                    _universeView.AddChild(meshInstance);
+
                     patchLineMeshesByPatch[vesselPatch] = meshInstance;
-                    AddChild(meshInstance);
                 }
             }
 
