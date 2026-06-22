@@ -11,6 +11,21 @@ public partial class OrbitLineDrawer : Control
 
     private Dictionary<string, MeshInstance3D> _orbitLineMeshesByCelestialBodyId = new();
 
+    private Dictionary<string, Dictionary<Patch, MeshInstance3D>> _patchLineMeshesByVesselId =
+        new();
+
+    private readonly Material _orbitLineMaterial = new StandardMaterial3D
+    {
+        ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        AlbedoColor = Colors.Aqua,
+    };
+
+    private readonly Material _patchLineMaterial = new StandardMaterial3D
+    {
+        ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        AlbedoColor = Colors.Green,
+    };
+
     public override void _Ready()
     {
         _universe.UniverseInitialized += _GenerateOrbitLineMeshes;
@@ -23,6 +38,7 @@ public partial class OrbitLineDrawer : Control
 
     public override void _Draw()
     {
+        _GeneratePatchLineMeshes();
         _UpdateOrbitLinePositions();
         _DrawClosestApproach();
         _DrawVelocities();
@@ -30,12 +46,6 @@ public partial class OrbitLineDrawer : Control
 
     private void _GenerateOrbitLineMeshes()
     {
-        var material = new StandardMaterial3D
-        {
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = Colors.Aqua,
-        };
-
         foreach (var body in _universe.GetCelestialBodies())
         {
             if (body.Orbit == null)
@@ -43,28 +53,102 @@ public partial class OrbitLineDrawer : Control
                 continue;
             }
 
-            var meshInstance = new MeshInstance3D();
-            var immediateMesh = new ImmediateMesh();
-            immediateMesh.ClearSurfaces();
-            immediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip, material);
-
-            int resolution = 100;
-
-            for (int i = 0; i <= resolution; i++)
-            {
-                double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
-                var state = body.Orbit.SolveStateAtEccentricAnomaly(eccentricAnomaly);
-                var pos = (Vector3)state.Position;
-                immediateMesh.SurfaceAddVertex(pos);
-            }
-
-            immediateMesh.SurfaceEnd();
-            meshInstance.Mesh = immediateMesh;
-            meshInstance.MaterialOverride = material;
-            _universe.AddChild(meshInstance);
-
+            var meshInstance = _GenerateEllipticalOrbitLineMesh(body.Orbit, _orbitLineMaterial);
+            AddChild(meshInstance);
             _orbitLineMeshesByCelestialBodyId.Add(body.CelestialBodyId, meshInstance);
         }
+    }
+
+    private void _GeneratePatchLineMeshes()
+    {
+        foreach (var vessel in _universe.PopVesselsWithDirtyPatches())
+        {
+            HashSet<Patch> vesselPatches = new(vessel.Trajectory.Patches);
+
+            Dictionary<Patch, MeshInstance3D> patchLineMeshesByPatch;
+            if (
+                !_patchLineMeshesByVesselId.TryGetValue(vessel.VesselId, out patchLineMeshesByPatch)
+            )
+            {
+                patchLineMeshesByPatch = new();
+                _patchLineMeshesByVesselId[vessel.VesselId] = patchLineMeshesByPatch;
+            }
+
+            foreach (var (patch, meshInstance) in patchLineMeshesByPatch)
+            {
+                if (!vesselPatches.Contains(patch))
+                {
+                    patchLineMeshesByPatch.Remove(patch);
+                    meshInstance.QueueFree();
+                }
+            }
+
+            foreach (var vesselPatch in vesselPatches)
+            {
+                if (!patchLineMeshesByPatch.ContainsKey(vesselPatch))
+                {
+                    MeshInstance3D meshInstance = _GeneratePatchLineMesh(vesselPatch);
+                    patchLineMeshesByPatch[vesselPatch] = meshInstance;
+                    AddChild(meshInstance);
+                }
+            }
+
+            _patchLineMeshesByVesselId[vessel.VesselId] = patchLineMeshesByPatch;
+        }
+    }
+
+    private MeshInstance3D _GenerateEllipticalOrbitLineMesh(Orbit orbit, Material material)
+    {
+        var meshInstance = new MeshInstance3D();
+        var immediateMesh = new ImmediateMesh();
+        immediateMesh.ClearSurfaces();
+        immediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip, material);
+
+        int resolution = 100;
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            double eccentricAnomaly = Mathf.DegToRad(i * 360f / resolution);
+            var state = orbit.SolveStateAtEccentricAnomaly(eccentricAnomaly);
+            var pos = (Vector3)state.Position;
+            immediateMesh.SurfaceAddVertex(pos);
+        }
+
+        immediateMesh.SurfaceEnd();
+        meshInstance.Mesh = immediateMesh;
+        meshInstance.MaterialOverride = material;
+
+        return meshInstance;
+    }
+
+    private MeshInstance3D _GeneratePatchLineMesh(Patch patch)
+    {
+        if (double.IsPositiveInfinity(patch.EndTime))
+        {
+            return _GenerateEllipticalOrbitLineMesh(patch.Orbit, _patchLineMaterial);
+        }
+
+        var meshInstance = new MeshInstance3D();
+        var immediateMesh = new ImmediateMesh();
+        immediateMesh.ClearSurfaces();
+        immediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip, _patchLineMaterial);
+
+        int resolution = 100;
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            var state = patch.Orbit.SolveStateAtTime(
+                patch.StartTime + ((double)i / resolution) * (patch.EndTime - patch.StartTime)
+            );
+            var pos = (Vector3)state.Position;
+            immediateMesh.SurfaceAddVertex(pos);
+        }
+
+        immediateMesh.SurfaceEnd();
+        meshInstance.Mesh = immediateMesh;
+        meshInstance.MaterialOverride = _patchLineMaterial;
+
+        return meshInstance;
     }
 
     private void _UpdateOrbitLinePositions()
@@ -74,6 +158,21 @@ public partial class OrbitLineDrawer : Control
             var body = _universe.GetCelestialBody(celestialBodyId);
             meshInstance.Position = (Vector3)
                 OrbitUtils.CalculateAbsolutePosition(body.Orbit.CenterBody);
+        }
+
+        foreach (var (vesselId, meshInstances) in _patchLineMeshesByVesselId)
+        {
+            int i = 0;
+
+            foreach (var (_, meshInstance) in meshInstances)
+            {
+                var vessel = _universe.GetVessel(vesselId);
+                meshInstance.Position = (Vector3)
+                    OrbitUtils.CalculateAbsolutePosition(
+                        vessel.Trajectory.Patches[i].Orbit.CenterBody
+                    );
+                i++;
+            }
         }
     }
 

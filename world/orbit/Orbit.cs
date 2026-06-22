@@ -65,18 +65,19 @@ public class Orbit
 
         var a = 1 / _alpha;
         SemiMajorAxis = a;
-        Period = Math.PI * 2 * a * Math.Sqrt(a / _mu);
 
         Vector3d eccentricityVector = ((_v0MagSq - (_mu / _r0Mag)) * _r0 - _r0DotV0 * _v0) / _mu;
         double e = eccentricityVector.Length();
 
         if (e < 1)
         {
+            Period = Math.PI * 2 * a * Math.Sqrt(a / _mu);
             Periapsis = a * (1 - e);
             Apoapsis = a * (1 + e);
         }
         else
         {
+            Period = -1;
             Periapsis = a * (1 - e);
             Apoapsis = -1;
         }
@@ -173,7 +174,7 @@ public class Orbit
 
     private double _SolveUniversalAnomalyAtRadius(double radius)
     {
-        double chi = 0.0;
+        double chi = _r0DotV0 < 0 ? -0.1 : 0.1;
 
         // Newton-Raphson
         int maxIterations = 100;

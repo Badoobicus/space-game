@@ -23,6 +23,7 @@ public partial class Universe : Node
     private readonly List<CelestialBody> _celestialBodies = new();
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
     private readonly Dictionary<string, Vessel> _vesselsById = new();
+    private readonly HashSet<Vessel> _vesselsWithDirtyPatches = new();
 
     public override void _Ready()
     {
@@ -154,7 +155,7 @@ public partial class Universe : Node
             Orbit = Orbit.FromElements(
                 new EllipticalOrbitElements
                 {
-                    CenterBody = planet2,
+                    CenterBody = planet1,
                     SemiMajorAxis = 0.5,
                     Eccentricity = 0,
                     Inclination = 0,
@@ -275,6 +276,13 @@ public partial class Universe : Node
         }
     }
 
+    public List<Vessel> PopVesselsWithDirtyPatches()
+    {
+        var result = new List<Vessel>(_vesselsWithDirtyPatches);
+        _vesselsWithDirtyPatches.Clear();
+        return result;
+    }
+
     private void _SimulateOrbitables()
     {
         foreach (var orbitable in _orbitables)
@@ -282,6 +290,36 @@ public partial class Universe : Node
             if (orbitable.Orbit == null)
             {
                 continue;
+            }
+
+            if (orbitable is Vessel vessel)
+            {
+                var prevTrajectory = vessel.Trajectory;
+
+                try
+                {
+                    vessel.Trajectory =
+                        vessel.Trajectory == null
+                            ? TrajectorySolver.SolveTrajectory(vessel.Orbit, _time)
+                            : vessel.Trajectory.FilterActivePatches(_time);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to solve trajectory for vessel {vessel.VesselId}",
+                        ex
+                    );
+                }
+
+                vessel.Orbit = vessel.Trajectory.CurrentPatch.Orbit;
+
+                if (
+                    prevTrajectory == null
+                    || vessel.Trajectory.CurrentPatch != prevTrajectory.CurrentPatch
+                )
+                {
+                    _vesselsWithDirtyPatches.Add(vessel);
+                }
             }
 
             var state = orbitable.Orbit.SolveStateAtTime(_time);
