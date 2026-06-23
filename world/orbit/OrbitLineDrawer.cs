@@ -12,10 +12,12 @@ public partial class OrbitLineDrawer : Control
     [Export]
     private Camera3D _camera;
 
-    private Dictionary<string, MeshInstance3D> _orbitLineMeshesByCelestialBodyId = new();
+    private readonly Dictionary<string, MeshInstance3D> _orbitLineMeshesByCelestialBodyId = [];
 
-    private Dictionary<string, Dictionary<Patch, MeshInstance3D>> _patchLineMeshesByVesselId =
-        new();
+    private readonly Dictionary<
+        string,
+        Dictionary<Patch, MeshInstance3D>
+    > _patchLineMeshesByVesselId = [];
 
     private readonly Material _orbitLineMaterial = new StandardMaterial3D
     {
@@ -75,7 +77,7 @@ public partial class OrbitLineDrawer : Control
                 !_patchLineMeshesByVesselId.TryGetValue(vessel.VesselId, out patchLineMeshesByPatch)
             )
             {
-                patchLineMeshesByPatch = new();
+                patchLineMeshesByPatch = [];
                 _patchLineMeshesByVesselId[vessel.VesselId] = patchLineMeshesByPatch;
             }
 

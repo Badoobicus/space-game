@@ -17,8 +17,8 @@ public partial class UniverseView : Node3D
 
     private int _mapFocusIndex;
 
-    private readonly Dictionary<string, CelestialBodyView> _celestialBodyViewsById = new();
-    private readonly Dictionary<string, VesselView> _vesselViewsById = new();
+    private readonly Dictionary<string, CelestialBodyView> _celestialBodyViewsById = [];
+    private readonly Dictionary<string, VesselView> _vesselViewsById = [];
 
     public override void _Ready()
     {

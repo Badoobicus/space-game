@@ -2,11 +2,9 @@ using System.Collections.Generic;
 
 public class VesselConfig
 {
-    private static readonly Vessel Vessel1;
-
     public static List<Vessel> CreateVessels(Dictionary<string, CelestialBody> celestialBodyMap)
     {
-        List<Vessel> vessels = new();
+        List<Vessel> vessels = [];
 
         var vessel1 = new Vessel
         {
@@ -20,7 +18,7 @@ public class VesselConfig
                     Inclination = 0,
                     LongitudeOfAscendingNode = 0,
                     ArgumentOfPeriapsis = 0,
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),

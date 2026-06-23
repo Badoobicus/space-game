@@ -16,7 +16,7 @@ public class Trajectory
             throw new ArgumentException("Patches cannot be null or empty.");
         }
 
-        _patches = patches.ToImmutableArray();
+        _patches = [.. patches];
     }
 
     public Trajectory FilterActivePatches(double time)
@@ -26,7 +26,7 @@ public class Trajectory
             return this;
         }
 
-        List<Patch> patches = new();
+        List<Patch> patches = [];
 
         foreach (var patch in Patches)
         {

@@ -19,10 +19,10 @@ public partial class Universe : Node
     private double _timeWarp;
     private double _targetWarpTime;
 
-    private readonly List<IOrbitable> _orbitables = new();
-    private readonly Dictionary<string, CelestialBody> _celestialBodiesById = new();
-    private readonly Dictionary<string, Vessel> _vesselsById = new();
-    private readonly HashSet<Vessel> _vesselsWithDirtyPatches = new();
+    private readonly List<IOrbitable> _orbitables = [];
+    private readonly Dictionary<string, CelestialBody> _celestialBodiesById = [];
+    private readonly Dictionary<string, Vessel> _vesselsById = [];
+    private readonly HashSet<Vessel> _vesselsWithDirtyPatches = [];
 
     public override void _Ready()
     {

@@ -1,5 +1,3 @@
-// csharpier-ignore
-
 public struct StateVector(Vector3d position, Vector3d velocity)
 {
     public Vector3d Position = position;
@@ -7,6 +5,6 @@ public struct StateVector(Vector3d position, Vector3d velocity)
 
     public override readonly string ToString()
     {
-       return $"[Pos: {Position}, Vel: {Velocity}]";
+        return $"[Pos: {Position}, Vel: {Velocity}]";
     }
 }

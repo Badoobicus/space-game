@@ -5,7 +5,7 @@ public class CelestialBodyConfig
 {
     public static List<CelestialBody> CreateCelestialBodies()
     {
-        List<CelestialBody> celestialBodies = new();
+        List<CelestialBody> celestialBodies = [];
 
         var star = new CelestialBody
         {
@@ -28,7 +28,7 @@ public class CelestialBodyConfig
                     Inclination = 0,
                     LongitudeOfAscendingNode = 0,
                     ArgumentOfPeriapsis = 0,
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),
@@ -50,7 +50,7 @@ public class CelestialBodyConfig
                     Inclination = 0,
                     LongitudeOfAscendingNode = 0,
                     ArgumentOfPeriapsis = 0,
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),
@@ -72,7 +72,7 @@ public class CelestialBodyConfig
                     Inclination = Mathf.DegToRad(3),
                     LongitudeOfAscendingNode = Mathf.DegToRad(90),
                     ArgumentOfPeriapsis = Mathf.DegToRad(45),
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),
@@ -94,7 +94,7 @@ public class CelestialBodyConfig
                     Inclination = 0,
                     LongitudeOfAscendingNode = 0,
                     ArgumentOfPeriapsis = 0,
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),
@@ -116,7 +116,7 @@ public class CelestialBodyConfig
                     Inclination = Mathf.DegToRad(-5),
                     LongitudeOfAscendingNode = 0,
                     ArgumentOfPeriapsis = 0,
-                    MeanAnomalyAtEpoch = 0
+                    MeanAnomalyAtEpoch = 0,
                 },
                 0
             ),

@@ -12,7 +12,7 @@ public class TrajectorySolver
 
     public static Trajectory SolveTrajectory(Orbit orbit, double startTime)
     {
-        List<Patch> patches = new();
+        List<Patch> patches = [];
         PatchSolverStep prevPatchStep = null;
 
         while (
@@ -97,7 +97,7 @@ public class TrajectorySolver
             return new PatchSolverStep
             {
                 Patch = new Patch(orbit, startTime, timeAtSoi),
-                NextOrbit = newOrbit
+                NextOrbit = newOrbit,
             };
         }
 
