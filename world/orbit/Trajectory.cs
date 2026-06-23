@@ -36,11 +36,6 @@ public class Trajectory
             }
         }
 
-        if (patches.Count > 0)
-        {
-            patches[0] = new Patch(patches[0].Orbit, patches[0].StartTime, patches[0].EndTime);
-        }
-
         return new Trajectory(patches);
     }
 }
