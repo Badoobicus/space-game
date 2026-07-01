@@ -1,6 +1,6 @@
-public class Patch(Orbit orbit, double startTime, double endTime)
+public class Patch(Orbit orbit, UniverseTime startTime, UniverseTime? endTime)
 {
     public Orbit Orbit => orbit;
-    public double StartTime => startTime;
-    public double EndTime => endTime;
+    public UniverseTime StartTime => startTime;
+    public UniverseTime? EndTime => endTime;
 }

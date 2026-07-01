@@ -1,5 +1,5 @@
-using Godot;
 using System;
+using Godot;
 
 public partial class UserInterface : Node
 {
@@ -33,30 +33,36 @@ public partial class UserInterface : Node
 
     private void _OnWarpToEpochShiftButtonPressed()
     {
-        _universe.SetTargetWarpTime(Constants.SecondsPerYear - 5);
+        _universe.SetTargetWarpTime(new UniverseTime(_universe.GetTime().MajorUnits + 1, -5));
     }
 
-    private void _OnTimeChanged(long year, double time)
+    private void _OnTimeChanged(long majorUnits, double seconds)
     {
         double secPerMinute = 60;
         double secPerHour = secPerMinute * 60;
         double secPerDay = secPerHour * 24;
         double secPerYear = secPerDay * 365;
 
-        double workingTime = time;
-        long years = (int)(workingTime / secPerYear);
+        double majorUnitsToYears = UniverseTime.SecondsPerMajorUnit / secPerYear;
+        double yearsToMajorUnits = secPerYear / UniverseTime.SecondsPerMajorUnit;
+
+        long baseYears = (long)(majorUnits * majorUnitsToYears);
+        double workingTime =
+            (majorUnits - baseYears * yearsToMajorUnits) * UniverseTime.SecondsPerMajorUnit
+            + seconds;
+        long years = (long)(workingTime / secPerYear);
         workingTime -= years * secPerYear;
-        int days = (int)(workingTime / secPerDay);
+        long days = (long)(workingTime / secPerDay);
         workingTime -= days * secPerDay;
-        int hours = (int)(workingTime / secPerHour);
+        long hours = (long)(workingTime / secPerHour);
         workingTime -= hours * secPerHour;
-        int minutes = (int)(workingTime / secPerMinute);
+        long minutes = (long)(workingTime / secPerMinute);
         workingTime -= minutes * secPerMinute;
-        int seconds = (int)workingTime;
+        long s = (long)workingTime;
 
-        years += year;
+        years += baseYears;
 
-        _timeLabel.Text = $"Year {years + 1}, Day {days + 1} {hours:D2}:{minutes:D2}:{seconds:D2}";
+        _timeLabel.Text = $"Year {years + 1}, Day {days + 1} {hours:D2}:{minutes:D2}:{s:D2}";
     }
 
     private void _OnTimeWarpChanged(double timeWarp)

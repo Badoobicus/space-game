@@ -30,7 +30,7 @@ public class CelestialBodyConfig
                     ArgumentOfPeriapsis = 0,
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
             Mass = 1,
             Radius = 0.25,
@@ -52,7 +52,7 @@ public class CelestialBodyConfig
                     ArgumentOfPeriapsis = 0,
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
             Mass = 0.05,
             Radius = 0.05,
@@ -74,7 +74,7 @@ public class CelestialBodyConfig
                     ArgumentOfPeriapsis = Mathf.DegToRad(45),
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
             Mass = 1,
             Radius = 0.5,
@@ -96,7 +96,7 @@ public class CelestialBodyConfig
                     ArgumentOfPeriapsis = 0,
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
             Mass = 0.05,
             Radius = 0.05,
@@ -118,7 +118,7 @@ public class CelestialBodyConfig
                     ArgumentOfPeriapsis = 0,
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
             Mass = 0.05,
             Radius = 0.05,

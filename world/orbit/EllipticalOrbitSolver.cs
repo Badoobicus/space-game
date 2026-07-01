@@ -1,4 +1,3 @@
-using Godot;
 using System;
 
 public class EllipticalOrbitSolver
@@ -11,14 +10,14 @@ public class EllipticalOrbitSolver
 
     private const double TwoPi = Math.PI * 2;
 
-    public static StateVector SolveState(EllipticalOrbitElements elements, double time)
+    public static StateVector SolveState(EllipticalOrbitElements elements, UniverseTime time)
     {
         double a = elements.SemiMajorAxis;
         double e = elements.Eccentricity;
         double M0 = elements.MeanAnomalyAtEpoch;
         double u = elements.CenterBody.Mass * Constants.GravitationalConstant;
 
-        double dt = time;
+        double dt = time.TotalSeconds;
         double M = WrapAngle(M0 + dt * (1 / a) * Math.Sqrt(u / a));
 
         double E = e > 0.8 ? Math.PI : M;

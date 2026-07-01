@@ -10,7 +10,7 @@ public class TrajectorySolver
         public Orbit NextOrbit { get; set; }
     }
 
-    public static Trajectory SolveTrajectory(Orbit orbit, double startTime)
+    public static Trajectory SolveTrajectory(Orbit orbit, UniverseTime startTime)
     {
         List<Patch> patches = [];
         PatchSolverStep prevPatchStep = null;
@@ -40,40 +40,16 @@ public class TrajectorySolver
     private static PatchSolverStep _SolveNextPatchStep(
         PatchSolverStep prevPatchStep,
         Orbit orbit,
-        double startTime
+        UniverseTime startTime
     )
     {
-        if (prevPatchStep != null && double.IsPositiveInfinity(prevPatchStep.Patch.EndTime))
+        if (prevPatchStep != null && prevPatchStep.Patch.EndTime == null)
         {
             return null;
         }
 
         if (orbit.Apoapsis > orbit.CenterBody.SoiRadius || orbit.Apoapsis < 0)
         {
-            var timeAtPeriapsis = orbit.SolveTimeAtRadius(orbit.Periapsis) % orbit.Period;
-
-            if (timeAtPeriapsis < 0)
-            {
-                timeAtPeriapsis += orbit.Period;
-            }
-
-            var timeAtSoi = orbit.SolveTimeAtRadius(orbit.CenterBody.SoiRadius) % orbit.Period;
-
-            if (timeAtSoi < 0)
-            {
-                timeAtSoi += orbit.Period;
-            }
-
-            if (timeAtSoi > timeAtPeriapsis + orbit.Period / 2)
-            {
-                timeAtSoi = orbit.Period - timeAtSoi;
-            }
-
-            if (timeAtSoi < startTime)
-            {
-                timeAtSoi += orbit.Period * Math.Ceiling((startTime - timeAtSoi) / orbit.Period);
-            }
-
             if (orbit.CenterBody.Orbit == null)
             {
                 throw new InvalidOperationException(
@@ -81,6 +57,24 @@ public class TrajectorySolver
                         + "celestial body does not have a center body"
                 );
             }
+
+            var timeAtSoi = orbit.SolveTimeAtRadius(orbit.CenterBody.SoiRadius);
+            var timeAtPeriapsis = orbit.SolveTimeAtRadius(orbit.Periapsis);
+            var secondsFromPeriapsisToSoi = timeAtPeriapsis.SecondsUntil(timeAtSoi) % orbit.Period;
+
+            if (secondsFromPeriapsisToSoi < 0)
+            {
+                secondsFromPeriapsisToSoi += orbit.Period;
+            }
+
+            if (secondsFromPeriapsisToSoi > orbit.Period / 2)
+            {
+                timeAtSoi = timeAtPeriapsis.PlusSeconds(orbit.Period - secondsFromPeriapsisToSoi);
+            }
+
+            timeAtSoi = timeAtSoi.PlusSeconds(
+                orbit.Period * Math.Ceiling(-startTime.SecondsUntil(timeAtSoi) / orbit.Period)
+            );
 
             var state = orbit.SolveStateAtTime(timeAtSoi);
             var centerBodyState = orbit.CenterBody.Orbit.SolveStateAtTime(timeAtSoi);
@@ -101,6 +95,6 @@ public class TrajectorySolver
             };
         }
 
-        return new PatchSolverStep { Patch = new Patch(orbit, startTime, double.PositiveInfinity) };
+        return new PatchSolverStep { Patch = new Patch(orbit, startTime, null) };
     }
 }

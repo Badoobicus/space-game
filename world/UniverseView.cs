@@ -82,7 +82,7 @@ public partial class UniverseView : Node3D
         );
     }
 
-    private void _OnTimeChanged(long year, double time)
+    private void _OnTimeChanged(long majorUnits, double seconds)
     {
         foreach (var (id, bodyView) in _celestialBodyViewsById)
         {

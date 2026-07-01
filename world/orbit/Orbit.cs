@@ -4,7 +4,6 @@ using Godot;
 public class Orbit
 {
     public CelestialBody CenterBody { get; }
-    public double Epoch => _t0;
     public double SemiMajorAxis { get; }
     public double Periapsis { get; }
     public double Apoapsis { get; }
@@ -44,9 +43,9 @@ public class Orbit
     private readonly double _sqrtAlpha;
 
     /// t0 - epoch
-    private readonly double _t0;
+    private readonly UniverseTime _t0;
 
-    private Orbit(CelestialBody centerBody, StateVector initialStateVector, double epoch)
+    private Orbit(CelestialBody centerBody, StateVector initialStateVector, UniverseTime epoch)
     {
         CenterBody = centerBody;
 
@@ -83,12 +82,7 @@ public class Orbit
         }
     }
 
-    public Orbit WithEpoch(double epoch)
-    {
-        return FromInitialState(CenterBody, _s0, epoch);
-    }
-
-    public StateVector SolveStateAtTime(double time)
+    public StateVector SolveStateAtTime(UniverseTime time)
     {
         double chi = _SolveUniversalAnomalyAtTime(time);
         return _SolveStateAtUniversalAnomaly(chi);
@@ -99,15 +93,15 @@ public class Orbit
         return _SolveStateAtUniversalAnomaly(eccentricAnomaly / _sqrtAlpha);
     }
 
-    public double SolveTimeAtRadius(double radius)
+    public UniverseTime SolveTimeAtRadius(double radius)
     {
         double universalAnomaly = _SolveUniversalAnomalyAtRadius(radius);
         return _SolveTimeAtUniversalAnomaly(universalAnomaly);
     }
 
-    private double _SolveUniversalAnomalyAtTime(double time)
+    private double _SolveUniversalAnomalyAtTime(UniverseTime time)
     {
-        double delta = time - _t0;
+        double delta = _t0.SecondsUntil(time);
 
         // initial guess for chi
         double chi = _sqrtMu * delta * Mathf.Abs(_alpha);
@@ -215,7 +209,7 @@ public class Orbit
         return chi;
     }
 
-    private double _SolveTimeAtUniversalAnomaly(double chi)
+    private UniverseTime _SolveTimeAtUniversalAnomaly(double chi)
     {
         double z = _alpha * chi * chi;
         double c2 = StumpffC2(z);
@@ -228,7 +222,7 @@ public class Orbit
                 + _r0Mag * chi
             ) / _sqrtMu;
 
-        return _t0 + dt;
+        return _t0 + UniverseTime.FromSeconds(dt);
     }
 
     private double StumpffC2(double z)
@@ -270,16 +264,22 @@ public class Orbit
             + zSqr * zSqr / 39916800.0;
     }
 
+    public Orbit WithTargetEpoch(UniverseTime targetEpoch)
+    {
+        var newEpoch = _t0.PlusSeconds(Period * (long)(_t0.SecondsUntil(targetEpoch) / Period));
+        return FromInitialState(CenterBody, _s0, newEpoch);
+    }
+
     public static Orbit FromInitialState(
         CelestialBody centerBody,
         StateVector stateVector,
-        double epoch
+        UniverseTime epoch
     )
     {
         return new Orbit(centerBody, stateVector, epoch);
     }
 
-    public static Orbit FromElements(EllipticalOrbitElements elements, double epoch)
+    public static Orbit FromElements(EllipticalOrbitElements elements, UniverseTime epoch)
     {
         return FromInitialState(
             elements.CenterBody,

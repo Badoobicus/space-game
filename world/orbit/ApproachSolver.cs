@@ -2,20 +2,20 @@ using System;
 
 public class ApproachSolver
 {
-    public static double SolveClosestApproach(
+    public static UniverseTime? SolveClosestApproach(
         CelestialBody subject,
         CelestialBody target,
-        double time
+        UniverseTime time
     )
     {
-        double resultTime = -1;
+        UniverseTime? resultTime = null;
         double resultDistanceSq = -1;
 
         double subjectPeriod = subject.Orbit.Period;
         int steps = 32;
         for (int i = 0; i < steps; i++)
         {
-            double t = time + i * (subjectPeriod / steps);
+            UniverseTime t = time.PlusSeconds(i * (subjectPeriod / steps));
 
             var subjectState = subject.Orbit.SolveStateAtTime(t);
             var subjectPosition = subjectState.Position;

@@ -133,7 +133,7 @@ public partial class OrbitLineDrawer : Control
 
     private MeshInstance3D _GeneratePatchLineMesh(Patch patch)
     {
-        if (double.IsPositiveInfinity(patch.EndTime))
+        if (!patch.EndTime.HasValue)
         {
             return _GenerateEllipticalOrbitLineMesh(patch.Orbit, _patchLineMaterial);
         }
@@ -148,7 +148,9 @@ public partial class OrbitLineDrawer : Control
         for (int i = 0; i <= resolution; i++)
         {
             var state = patch.Orbit.SolveStateAtTime(
-                patch.StartTime + ((double)i / resolution) * (patch.EndTime - patch.StartTime)
+                patch.StartTime.PlusSeconds(
+                    ((double)i / resolution) * patch.StartTime.SecondsUntil(patch.EndTime.Value)
+                )
             );
             var pos = (Vector3)state.Position;
             immediateMesh.SurfaceAddVertex(pos);
@@ -197,14 +199,14 @@ public partial class OrbitLineDrawer : Control
             _universe.GetTime()
         );
 
-        if (timeOfClosestApproach < 0)
+        if (!timeOfClosestApproach.HasValue)
         {
             return;
         }
 
-        var state1 = body1.Orbit.SolveStateAtTime(timeOfClosestApproach);
+        var state1 = body1.Orbit.SolveStateAtTime(timeOfClosestApproach.Value);
         Vector3 pos1 = (Vector3)state1.Position;
-        var state2 = body2.Orbit.SolveStateAtTime(timeOfClosestApproach);
+        var state2 = body2.Orbit.SolveStateAtTime(timeOfClosestApproach.Value);
         Vector3 pos2 = (Vector3)state2.Position;
 
         if (!_camera.IsPositionBehind(pos1))

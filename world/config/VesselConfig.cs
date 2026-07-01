@@ -20,7 +20,7 @@ public class VesselConfig
                     ArgumentOfPeriapsis = 0,
                     MeanAnomalyAtEpoch = 0,
                 },
-                0
+                UniverseTime.Zero
             ),
         };
         vessels.Add(vessel1);

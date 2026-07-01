@@ -19,7 +19,7 @@ public class Trajectory
         _patches = [.. patches];
     }
 
-    public Trajectory FilterActivePatches(double time)
+    public Trajectory FilterActivePatches(UniverseTime time)
     {
         if (time < CurrentPatch.EndTime)
         {
@@ -30,10 +30,24 @@ public class Trajectory
 
         foreach (var patch in Patches)
         {
-            if (patch.EndTime > time)
+            if (patch.EndTime == null || patch.EndTime > time)
             {
                 patches.Add(patch);
             }
+        }
+
+        return new Trajectory(patches);
+    }
+
+    public Trajectory WithTargetEpoch(UniverseTime targetEpoch)
+    {
+        List<Patch> patches = [];
+
+        foreach (var patch in Patches)
+        {
+            patches.Add(
+                new Patch(patch.Orbit.WithTargetEpoch(targetEpoch), patch.StartTime, patch.EndTime)
+            );
         }
 
         return new Trajectory(patches);

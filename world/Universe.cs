@@ -8,16 +8,15 @@ public partial class Universe : Node
     public delegate void UniverseInitializedEventHandler();
 
     [Signal]
-    public delegate void TimeChangedEventHandler(long year, double time);
+    public delegate void TimeChangedEventHandler(long year, double seconds);
 
     [Signal]
     public delegate void TimeWarpChangeEventHandler(double timeWarp);
 
-    private long _year;
-    private double _time;
+    private UniverseTime _time;
     private int _timeWarpStep;
     private double _timeWarp;
-    private double _targetWarpTime;
+    private UniverseTime _targetWarpTime;
 
     private readonly List<IOrbitable> _orbitables = [];
     private readonly Dictionary<string, CelestialBody> _celestialBodiesById = [];
@@ -46,9 +45,8 @@ public partial class Universe : Node
 
         EmitSignalUniverseInitialized();
 
-        _year = 0;
-        _time = 0;
-        EmitSignalTimeChanged(_year, _time);
+        _time = UniverseTime.Zero;
+        EmitSignalTimeChanged(_time.MajorUnits, _time.Seconds);
 
         _timeWarp = _CalculateTimeWarp(_timeWarpStep);
         EmitSignalTimeWarpChange(_timeWarp);
@@ -56,24 +54,26 @@ public partial class Universe : Node
 
     public override void _PhysicsProcess(double delta)
     {
-        if (_targetWarpTime > 0)
+        var prevTime = _time;
+
+        if (_targetWarpTime > _time)
         {
             _time = _targetWarpTime;
-            _targetWarpTime = -1;
+            _targetWarpTime = UniverseTime.Zero;
         }
         else
         {
-            _time += delta * _timeWarp;
+            _time = _time.PlusSeconds(_timeWarp * delta);
         }
 
-        if (_time > Constants.SecondsPerYear)
+        if (_time.MajorUnits > prevTime.MajorUnits)
         {
             _ShiftEpoch();
         }
 
         _SimulateOrbitables();
 
-        EmitSignalTimeChanged(_year, _time);
+        EmitSignalTimeChanged(_time.MajorUnits, _time.Seconds);
     }
 
     public override void _Input(InputEvent @event)
@@ -123,14 +123,20 @@ public partial class Universe : Node
         return new(_vesselsById.Values);
     }
 
-    public double GetTime()
+    public UniverseTime GetTime()
     {
         return _time;
     }
 
-    public void SetTargetWarpTime(double targetWarpTime)
+    public void SetTargetWarpTime(UniverseTime targetWarpTime)
     {
-        if (targetWarpTime > _time)
+        if (
+            targetWarpTime.MajorUnits > _time.MajorUnits
+            || (
+                targetWarpTime.MajorUnits == _time.MajorUnits
+                && targetWarpTime.Seconds > _time.Seconds
+            )
+        )
         {
             _targetWarpTime = targetWarpTime;
         }
@@ -190,9 +196,6 @@ public partial class Universe : Node
 
     private void _ShiftEpoch()
     {
-        var shiftedYears = (long)_time / Constants.SecondsPerYear;
-        var shiftedSeconds = shiftedYears * Constants.SecondsPerYear;
-
         foreach (var orbitable in _orbitables)
         {
             if (orbitable.Orbit == null)
@@ -200,14 +203,16 @@ public partial class Universe : Node
                 continue;
             }
 
-            orbitable.Orbit = orbitable.Orbit.WithEpoch(
-                orbitable.Orbit.Period
-                    + (orbitable.Orbit.Epoch - shiftedSeconds) % orbitable.Orbit.Period
-            );
+            if (orbitable is CelestialBody celestialBody)
+            {
+                celestialBody.Orbit = celestialBody.Orbit.WithTargetEpoch(_time);
+            }
+            else if (orbitable is Vessel vessel)
+            {
+                vessel.Trajectory = vessel.Trajectory.WithTargetEpoch(_time);
+                vessel.Orbit = vessel.Trajectory.CurrentPatch.Orbit;
+            }
         }
-
-        _year += shiftedYears;
-        _time -= shiftedSeconds;
     }
 
     private double _CalculateTimeWarp(int timeWarpStep)
