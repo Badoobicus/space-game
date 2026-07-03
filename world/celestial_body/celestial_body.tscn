@@ -5,7 +5,7 @@
 
 [sub_resource type="SphereMesh" id="SphereMesh_y367p"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_itcce"]
+[sub_resource type="QuadMesh" id="QuadMesh_y367p"]
 
 [node name="CelestialBody" type="Node3D" unique_id=1447000563 node_paths=PackedStringArray("_mesh", "_soiMesh")]
 script = ExtResource("1_y367p")
@@ -17,5 +17,5 @@ mesh = SubResource("SphereMesh_y367p")
 
 [node name="SoiMesh" type="MeshInstance3D" parent="." unique_id=112895091]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
-mesh = SubResource("SphereMesh_itcce")
+mesh = SubResource("QuadMesh_y367p")
 surface_material_override/0 = ExtResource("2_y367p")
