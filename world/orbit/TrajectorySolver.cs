@@ -17,7 +17,6 @@ public class TrajectorySolver
 
         while (
             _SolveNextPatchStep(
-                prevPatchStep,
                 prevPatchStep?.NextOrbit ?? orbit,
                 prevPatchStep?.Patch?.EndTime ?? startTime
             )
@@ -25,76 +24,91 @@ public class TrajectorySolver
         )
         {
             patches.Add(patchStep.Patch);
-            prevPatchStep = patchStep;
+
+            if (patchStep.Patch.EndTime == null)
+            {
+                break;
+            }
 
             if (patches.Count > 10)
             {
                 GD.PrintErr("Exceeded maximum patches threshold; breaking loop");
                 break;
             }
+
+            prevPatchStep = patchStep;
         }
 
         return new Trajectory(patches.ToArray());
     }
 
-    private static PatchSolverStep _SolveNextPatchStep(
-        PatchSolverStep prevPatchStep,
-        Orbit orbit,
-        UniverseTime startTime
-    )
+    private static PatchSolverStep _SolveNextPatchStep(Orbit orbit, UniverseTime startTime)
     {
-        if (prevPatchStep != null && prevPatchStep.Patch.EndTime == null)
+        PatchSolverStep step = _SolveSoiEjectionPatchStep(orbit, startTime);
+
+        step =
+            _SolveInterceptPatchStep(
+                orbit,
+                startTime,
+                step?.Patch?.EndTime ?? startTime.PlusSeconds(orbit.Period)
+            ) ?? step;
+
+        return step ?? new PatchSolverStep { Patch = new Patch(orbit, startTime, null) };
+    }
+
+    private static PatchSolverStep _SolveSoiEjectionPatchStep(Orbit orbit, UniverseTime startTime)
+    {
+        if (
+            orbit.Apoapsis > 0 && orbit.Apoapsis <= orbit.CenterBody.SoiRadius
+            || orbit.CenterBody.Orbit == null
+        )
         {
             return null;
         }
 
-        if (orbit.Apoapsis > orbit.CenterBody.SoiRadius || orbit.Apoapsis < 0)
+        var timeAtSoi = orbit.SolveTimeAtRadius(orbit.CenterBody.SoiRadius);
+        var timeAtPeriapsis = orbit.SolveTimeAtRadius(orbit.Periapsis);
+        var secondsFromPeriapsisToSoi = timeAtPeriapsis.SecondsUntil(timeAtSoi) % orbit.Period;
+
+        if (secondsFromPeriapsisToSoi < 0)
         {
-            if (orbit.CenterBody.Orbit == null)
-            {
-                throw new InvalidOperationException(
-                    $"Unable to exit SOI of celestial body {orbit.CenterBody.CelestialBodyId}; "
-                        + "celestial body does not have a center body"
-                );
-            }
-
-            var timeAtSoi = orbit.SolveTimeAtRadius(orbit.CenterBody.SoiRadius);
-            var timeAtPeriapsis = orbit.SolveTimeAtRadius(orbit.Periapsis);
-            var secondsFromPeriapsisToSoi = timeAtPeriapsis.SecondsUntil(timeAtSoi) % orbit.Period;
-
-            if (secondsFromPeriapsisToSoi < 0)
-            {
-                secondsFromPeriapsisToSoi += orbit.Period;
-            }
-
-            if (secondsFromPeriapsisToSoi > orbit.Period / 2)
-            {
-                timeAtSoi = timeAtPeriapsis.PlusSeconds(orbit.Period - secondsFromPeriapsisToSoi);
-            }
-
-            timeAtSoi = timeAtSoi.PlusSeconds(
-                orbit.Period * Math.Ceiling(-startTime.SecondsUntil(timeAtSoi) / orbit.Period)
-            );
-
-            var state = orbit.SolveStateAtTime(timeAtSoi);
-            var centerBodyState = orbit.CenterBody.Orbit.SolveStateAtTime(timeAtSoi);
-            var newState = new StateVector(
-                centerBodyState.Position + state.Position,
-                centerBodyState.Velocity + state.Velocity
-            );
-            var newOrbit = Orbit.FromInitialState(
-                orbit.CenterBody.Orbit.CenterBody,
-                newState,
-                timeAtSoi
-            );
-
-            return new PatchSolverStep
-            {
-                Patch = new Patch(orbit, startTime, timeAtSoi),
-                NextOrbit = newOrbit,
-            };
+            secondsFromPeriapsisToSoi += orbit.Period;
         }
 
-        return new PatchSolverStep { Patch = new Patch(orbit, startTime, null) };
+        if (secondsFromPeriapsisToSoi > orbit.Period / 2)
+        {
+            timeAtSoi = timeAtPeriapsis.PlusSeconds(orbit.Period - secondsFromPeriapsisToSoi);
+        }
+
+        timeAtSoi = timeAtSoi.PlusSeconds(
+            orbit.Period * Math.Ceiling(-startTime.SecondsUntil(timeAtSoi) / orbit.Period)
+        );
+
+        var state = orbit.SolveStateAtTime(timeAtSoi);
+        var centerBodyState = orbit.CenterBody.Orbit.SolveStateAtTime(timeAtSoi);
+        var newState = new StateVector(
+            centerBodyState.Position + state.Position,
+            centerBodyState.Velocity + state.Velocity
+        );
+        var newOrbit = Orbit.FromInitialState(
+            orbit.CenterBody.Orbit.CenterBody,
+            newState,
+            timeAtSoi
+        );
+
+        return new PatchSolverStep
+        {
+            Patch = new Patch(orbit, startTime, timeAtSoi),
+            NextOrbit = newOrbit,
+        };
+    }
+
+    private static PatchSolverStep _SolveInterceptPatchStep(
+        Orbit orbit,
+        UniverseTime startTime,
+        UniverseTime endTime
+    )
+    {
+        return null;
     }
 }
