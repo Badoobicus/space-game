@@ -10,7 +10,7 @@
 
 [node name="Node" type="Node" unique_id=1351746466]
 
-[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_universe", "_timeLabel", "_timeWarpLabel", "_fpsLabel", "_warpToEpochShiftButton")]
+[node name="UserInterface" type="Control" parent="." unique_id=1648339722 node_paths=PackedStringArray("_universe", "_timeLabel", "_timeWarpLabel", "_fpsLabel", "_resetTimeButton", "_warpToEpochShiftButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,6 +22,7 @@ _universe = NodePath("../Universe")
 _timeLabel = NodePath("VBoxContainer1/TimeLabel")
 _timeWarpLabel = NodePath("VBoxContainer1/TimeWarpLabel")
 _fpsLabel = NodePath("VBoxContainer1/FpsLabel")
+_resetTimeButton = NodePath("VBoxContainer2/ResetTimeButton")
 _warpToEpochShiftButton = NodePath("VBoxContainer2/WarpToEpochShiftButton")
 
 [node name="VBoxContainer1" type="VBoxContainer" parent="UserInterface" unique_id=430396609]
@@ -49,6 +50,10 @@ anchor_right = 1.0
 offset_left = -40.0
 offset_bottom = 40.0
 grow_horizontal = 0
+
+[node name="ResetTimeButton" type="Button" parent="UserInterface/VBoxContainer2" unique_id=272715077]
+layout_mode = 2
+text = "Reset Time"
 
 [node name="WarpToEpochShiftButton" type="Button" parent="UserInterface/VBoxContainer2" unique_id=1672038465]
 layout_mode = 2

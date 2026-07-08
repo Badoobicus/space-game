@@ -16,6 +16,7 @@ public partial class Universe : Node
     private UniverseTime _time;
     private int _timeWarpStep;
     private double _timeWarp;
+    private bool _resetTime;
     private UniverseTime _targetWarpTime;
 
     private readonly List<IOrbitable> _orbitables = [];
@@ -61,12 +62,17 @@ public partial class Universe : Node
             _time = _targetWarpTime;
             _targetWarpTime = UniverseTime.Zero;
         }
+        else if (_resetTime)
+        {
+            _time = UniverseTime.Zero;
+            _resetTime = false;
+        }
         else
         {
             _time = _time.PlusSeconds(_timeWarp * delta);
         }
 
-        if (_time.MajorUnits > prevTime.MajorUnits)
+        if (_time.MajorUnits != prevTime.MajorUnits)
         {
             _ShiftEpoch();
         }
@@ -126,6 +132,11 @@ public partial class Universe : Node
     public UniverseTime GetTime()
     {
         return _time;
+    }
+
+    public void ResetTime()
+    {
+        _resetTime = true;
     }
 
     public void SetTargetWarpTime(UniverseTime targetWarpTime)
