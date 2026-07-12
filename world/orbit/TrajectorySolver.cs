@@ -6,8 +6,15 @@ public class TrajectorySolver
 {
     private class PatchSolverStep
     {
-        public Patch Patch { get; set; }
-        public Orbit NextOrbit { get; set; }
+        public Patch Patch;
+        public Orbit NextOrbit;
+    }
+
+    private class InterceptState
+    {
+        public StateVector State;
+        public double DistanceToTarget;
+        public double DistanceVelocityToTarget;
     }
 
     public static Trajectory SolveTrajectory(Orbit orbit, UniverseTime startTime)
@@ -120,6 +127,187 @@ public class TrajectorySolver
         UniverseTime endTime
     )
     {
+        UniverseTime? result = null;
+        CelestialBody target = null;
+        var celestialBodies = _DeterminePossibleInterceptTargets(orbit);
+
+        foreach (var celestialBody in celestialBodies)
+        {
+            var time = _CalculateInterceptTime(orbit, celestialBody, startTime, endTime);
+
+            if (result == null || time < result)
+            {
+                result = time;
+                target = celestialBody;
+            }
+        }
+
+        if (result is { } resultTime)
+        {
+            var state = orbit.SolveStateAtTime(resultTime);
+            var targetState = target.Orbit.SolveStateAtTime(resultTime);
+            var newState = new StateVector(
+                state.Position - targetState.Position,
+                state.Velocity - targetState.Velocity
+            );
+            var newOrbit = Orbit.FromInitialState(target, newState, resultTime);
+
+            return new PatchSolverStep
+            {
+                Patch = new Patch(orbit, startTime, resultTime),
+                NextOrbit = newOrbit,
+            };
+        }
+
         return null;
+    }
+
+    private static List<CelestialBody> _DeterminePossibleInterceptTargets(Orbit orbit)
+    {
+        List<CelestialBody> result = new();
+
+        foreach (var celestialBody in orbit.CenterBody.OrbitingCelestialBodies)
+        {
+            if (
+                orbit.Apoapsis >= celestialBody.Orbit.Periapsis - celestialBody.SoiRadius
+                && orbit.Periapsis <= celestialBody.Orbit.Apoapsis + celestialBody.SoiRadius
+            )
+            {
+                result.Add(celestialBody);
+            }
+        }
+
+        return result;
+    }
+
+    private static UniverseTime? _CalculateInterceptTime(
+        Orbit orbit,
+        CelestialBody target,
+        UniverseTime startTime,
+        UniverseTime endTime
+    )
+    {
+        if (orbit.Apoapsis < 0)
+        {
+            throw new NotImplementedException(
+                "Intercept solver not yet implemented for non-elliptical orbits"
+            );
+        }
+
+        UniverseTime? lastTime = null;
+        InterceptState lastInterceptState = null;
+
+        var resolution = 32;
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            UniverseTime time = startTime.PlusSeconds(
+                startTime.SecondsUntil(endTime) * ((double)i / resolution)
+            );
+            InterceptState interceptState = _CalculateInterceptState(orbit, target.Orbit, time);
+
+            if (
+                lastTime.HasValue
+                && lastInterceptState.DistanceToTarget > target.SoiRadius
+                && lastInterceptState.DistanceVelocityToTarget < 0
+                && (
+                    interceptState.DistanceToTarget < target.SoiRadius
+                    || interceptState.DistanceVelocityToTarget > 0
+                )
+            )
+            {
+                var interceptTime = _NarrowInterceptTime(orbit, lastTime.Value, time, target);
+
+                if (interceptTime.HasValue)
+                {
+                    return interceptTime;
+                }
+            }
+
+            lastTime = time;
+            lastInterceptState = interceptState;
+        }
+
+        return null;
+    }
+
+    private static UniverseTime? _NarrowInterceptTime(
+        Orbit orbit,
+        UniverseTime startTime,
+        UniverseTime endTime,
+        CelestialBody target
+    )
+    {
+        UniverseTime lowerTime = startTime;
+        InterceptState lowerInterceptState = _CalculateInterceptState(
+            orbit,
+            target.Orbit,
+            lowerTime
+        );
+
+        UniverseTime upperTime = endTime;
+        InterceptState upperInterceptState = _CalculateInterceptState(
+            orbit,
+            target.Orbit,
+            upperTime
+        );
+
+        int i = 0;
+
+        while (
+            lowerInterceptState.State.Position.DistanceTo(upperInterceptState.State.Position)
+            > lowerInterceptState.DistanceToTarget - target.SoiRadius
+        )
+        {
+            if (i >= 100)
+            {
+                GD.PrintErr("Exceeded threshold for intercept calculator; breaking loop");
+                return null;
+            }
+
+            var time = lowerTime.PlusSeconds(lowerTime.SecondsUntil(upperTime) / 2);
+
+            InterceptState interceptState = _CalculateInterceptState(orbit, target.Orbit, time);
+
+            if (
+                interceptState.DistanceToTarget <= target.SoiRadius
+                || interceptState.DistanceVelocityToTarget > 0
+            )
+            {
+                upperTime = time;
+                upperInterceptState = interceptState;
+            }
+            else
+            {
+                lowerTime = time;
+                lowerInterceptState = interceptState;
+            }
+
+            i++;
+        }
+
+        return null;
+    }
+
+    private static InterceptState _CalculateInterceptState(
+        Orbit orbit,
+        Orbit targetOrbit,
+        UniverseTime time
+    )
+    {
+        StateVector state = orbit.SolveStateAtTime(time);
+        StateVector targetState = targetOrbit.SolveStateAtTime(time);
+
+        Vector3d relPos = targetState.Position - state.Position;
+        double distance = relPos.Length();
+        Vector3d relVel = targetState.Velocity - state.Velocity;
+        double distanceVel = relVel.Dot(relPos) / distance;
+
+        return new InterceptState
+        {
+            State = state,
+            DistanceToTarget = distance,
+            DistanceVelocityToTarget = distanceVel,
+        };
     }
 }

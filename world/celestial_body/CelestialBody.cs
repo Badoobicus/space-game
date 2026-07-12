@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class CelestialBody : IOrbitable
 {
     public string CelestialBodyId { get; set; }
@@ -7,4 +9,5 @@ public class CelestialBody : IOrbitable
     public double SoiRadius { get; set; }
     public Vector3d Position { get; set; }
     public Vector3d Velocity { get; set; }
+    public HashSet<CelestialBody> OrbitingCelestialBodies { get; } = new();
 }

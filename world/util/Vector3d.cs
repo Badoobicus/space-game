@@ -20,6 +20,16 @@ public struct Vector3d
 
     public readonly double LengthSquared() => X * X + Y * Y + Z * Z;
 
+    public readonly double DistanceTo(Vector3d to) => Math.Sqrt(DistanceSquaredTo(to));
+
+    public readonly double DistanceSquaredTo(Vector3d to)
+    {
+        double dx = X - to.X;
+        double dy = Y - to.Y;
+        double dz = Z - to.Z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     public readonly double Dot(Vector3d v) => X * v.X + Y * v.Y + Z * v.Z;
 
     public readonly Vector3d Cross(Vector3d v) =>

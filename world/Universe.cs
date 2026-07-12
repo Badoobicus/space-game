@@ -32,6 +32,7 @@ public partial class Universe : Node
         {
             _celestialBodiesById.Add(celestialBody.CelestialBodyId, celestialBody);
             _orbitables.Add(celestialBody);
+            celestialBody?.Orbit?.CenterBody?.OrbitingCelestialBodies?.Add(celestialBody);
         }
 
         List<Vessel> vessels = VesselConfig.CreateVessels(_celestialBodiesById);

@@ -168,7 +168,16 @@ public class Orbit
 
     private double _SolveUniversalAnomalyAtRadius(double radius)
     {
-        double chi = _r0DotV0 < 0 ? -0.1 : 0.1;
+        double chi;
+        if (_alpha > 0)
+        {
+            chi = _sqrtMu * (_alpha * 0.5) * (_r0DotV0 < 0 ? -1 : 1);
+        }
+        else
+        {
+            double safetyAlpha = Math.Abs(_alpha) < 1e-6 ? 1e-6 : Math.Abs(_alpha);
+            chi = Math.Log(radius / _r0Mag) / Math.Sqrt(safetyAlpha) * (_r0DotV0 < 0 ? -1 : 1);
+        }
 
         // Newton-Raphson
         int maxIterations = 100;
@@ -184,9 +193,7 @@ public class Orbit
                 + _r0Mag;
 
             double drChi =
-                (_r0DotV0 / _sqrtMu) * (1 - z * c2)
-                + (1 - _alpha * _r0Mag) * chi * (1 - z * c3)
-                + _r0Mag;
+                (_r0DotV0 / _sqrtMu) * (1 - z * c2) + (1 - _alpha * _r0Mag) * chi * (1 - z * c3);
 
             // Prevent division by zero if we hit an exact apoapsis/periapsis turn
             if (Math.Abs(drChi) < 1e-12)
