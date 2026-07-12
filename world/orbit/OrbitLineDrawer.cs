@@ -172,18 +172,12 @@ public partial class OrbitLineDrawer : Control
                 OrbitUtils.CalculateAbsolutePosition(body.Orbit.CenterBody);
         }
 
-        foreach (var (vesselId, meshInstances) in _patchLineMeshesByVesselId)
+        foreach (var (_, meshInstances) in _patchLineMeshesByVesselId)
         {
-            int i = 0;
-
-            foreach (var (_, meshInstance) in meshInstances)
+            foreach (var (patch, meshInstance) in meshInstances)
             {
-                var vessel = _universe.GetVessel(vesselId);
                 meshInstance.Position = (Vector3)
-                    OrbitUtils.CalculateAbsolutePosition(
-                        vessel.Trajectory.Patches[i].Orbit.CenterBody
-                    );
-                i++;
+                    OrbitUtils.CalculateAbsolutePosition(patch.Orbit.CenterBody);
             }
         }
     }
