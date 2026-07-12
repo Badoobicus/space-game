@@ -68,21 +68,32 @@ public class TrajectorySolver
 
         var timeAtSoi = orbit.SolveTimeAtRadius(orbit.CenterBody.SoiRadius);
         var timeAtPeriapsis = orbit.SolveTimeAtRadius(orbit.Periapsis);
-        var secondsFromPeriapsisToSoi = timeAtPeriapsis.SecondsUntil(timeAtSoi) % orbit.Period;
 
-        if (secondsFromPeriapsisToSoi < 0)
+        if (orbit.Apoapsis > 0)
         {
-            secondsFromPeriapsisToSoi += orbit.Period;
-        }
+            var secondsFromPeriapsisToSoi = timeAtPeriapsis.SecondsUntil(timeAtSoi) % orbit.Period;
 
-        if (secondsFromPeriapsisToSoi > orbit.Period / 2)
+            if (secondsFromPeriapsisToSoi < 0)
+            {
+                secondsFromPeriapsisToSoi += orbit.Period;
+            }
+
+            if (secondsFromPeriapsisToSoi > orbit.Period / 2)
+            {
+                timeAtSoi = timeAtPeriapsis.PlusSeconds(orbit.Period - secondsFromPeriapsisToSoi);
+            }
+
+            timeAtSoi = timeAtSoi.PlusSeconds(
+                orbit.Period * Math.Ceiling(-startTime.SecondsUntil(timeAtSoi) / orbit.Period)
+            );
+        }
+        else
         {
-            timeAtSoi = timeAtPeriapsis.PlusSeconds(orbit.Period - secondsFromPeriapsisToSoi);
+            if (timeAtSoi.SecondsUntil(timeAtPeriapsis) > 0)
+            {
+                timeAtSoi = timeAtPeriapsis.PlusSeconds(timeAtSoi.SecondsUntil(timeAtPeriapsis));
+            }
         }
-
-        timeAtSoi = timeAtSoi.PlusSeconds(
-            orbit.Period * Math.Ceiling(-startTime.SecondsUntil(timeAtSoi) / orbit.Period)
-        );
 
         var state = orbit.SolveStateAtTime(timeAtSoi);
         var centerBodyState = orbit.CenterBody.Orbit.SolveStateAtTime(timeAtSoi);
